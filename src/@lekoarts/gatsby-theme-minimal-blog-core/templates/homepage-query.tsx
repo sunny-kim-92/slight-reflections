@@ -8,7 +8,7 @@ export default Homepage
 
 export const query = graphql`
   query($formatString: String!) {
-    allPost(sort: { fields: date, order: DESC }, limit: 5) {
+    allPost(sort: { date: DESC }, limit: 5) {
       nodes {
         slug
         title
