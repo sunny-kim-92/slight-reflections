@@ -1,5 +1,5 @@
 import React, { Component, useRef, useState, useEffect } from 'react';
-import { Doughnut, getDatasetAtEvent } from 'react-chartjs-2';
+import { Doughnut, getDatasetAtEvent, getElementAtEvent, getElementsAtEvent } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 
 import Dropdown from 'react-select';
@@ -43,62 +43,61 @@ function ChessChart() {
   const [radarData, setRadarData] = useState({ labels: [], datasets: [] })
   const [labels, setLabels] = useState([])
   const [datasets, setDatasets] = useState([])
+  const chartRef = useRef();
 
   useEffect(() => {
     const load = async () => {
-    let totalMoveCountMap = {};
-    let playersMoveCountMap = {};
+      let totalMoveCountMap = {};
+      let playersMoveCountMap = {};
 
-    let newGames = [];
-    let opponentName = '';
+      let newGames = [];
+      let opponentName = '';
 
-    data.forEach(entry => {
-      if (getColorFilter(entry)) {
-        let tempGame = entry;
-        let moves = null;
-        if (typeof entry.moves == 'object') {
-          moves = entry.moves;
-          tempGame['moves'] = moves;
-        } else {
-          let moveString = entry.moves;
-          moves = moveString.split(' ');
-          tempGame['moves'] = moves;
-          for (let i = 0; i < moves.length; i++) {
-            if (moves[i].indexOf('.') != -1) {
-              moves.splice(i, 1);
+      data.forEach(entry => {
+        if (getColorFilter(entry)) {
+          let tempGame = entry;
+          let moves = null;
+          if (typeof entry.moves == 'object') {
+            moves = entry.moves;
+            tempGame['moves'] = moves;
+          } else {
+            let moveString = entry.moves;
+            moves = moveString.split(' ');
+            tempGame['moves'] = moves;
+            for (let i = 0; i < moves.length; i++) {
+              if (moves[i].indexOf('.') != -1) {
+                moves.splice(i, 1);
+              }
             }
           }
-        }
-        if (!totalMoveCountMap[moves[0]]) {
-          totalMoveCountMap[moves[0]] = 1;
-        } else {
-          totalMoveCountMap[moves[0]]++;
-        }
+          if (!totalMoveCountMap[moves[0]]) {
+            totalMoveCountMap[moves[0]] = 1;
+          } else {
+            totalMoveCountMap[moves[0]]++;
+          }
 
-        if (playerOne == entry.white) {
-          opponentName = entry.black;
-        } else {
-          opponentName = entry.white;
-        }
+          if (playerOne == entry.white) {
+            opponentName = entry.black;
+          } else {
+            opponentName = entry.white;
+          }
 
-        if (!playersMoveCountMap[opponentName]) {
-          playersMoveCountMap[opponentName] = {};
+          if (!playersMoveCountMap[opponentName]) {
+            playersMoveCountMap[opponentName] = {};
+          }
+          if (!playersMoveCountMap[opponentName][moves[0]]) {
+            playersMoveCountMap[opponentName][moves[0]] = 1;
+          } else {
+            playersMoveCountMap[opponentName][moves[0]]++;
+          }
+          newGames.push(tempGame);
         }
-        if (!playersMoveCountMap[opponentName][moves[0]]) {
-          playersMoveCountMap[opponentName][moves[0]] = 1;
-        } else {
-          playersMoveCountMap[opponentName][moves[0]]++;
-        }
-        newGames.push(tempGame);
-      }
-    });
+      });
 
-    console.log(totalMoveCountMap)
-
-    generateChart(totalMoveCountMap, playersMoveCountMap, newGames);
-  }
-  load()
-}, [])
+      generateChart(totalMoveCountMap, playersMoveCountMap, newGames);
+    }
+    load()
+  }, [])
 
   const handleReset = () => {
     let totalMoveCountMap = {};
@@ -152,59 +151,59 @@ function ChessChart() {
     generateChart(totalMoveCountMap, playersMoveCountMap, newGames);
   };
 
-  const handleMoveSelect = event => {
-    if (event[0]) {
-      let moves = moves;
-      let newMove = labels[event[0]._index];
-      moves.push(labels[event[0]._index]);
-      let moveNumber = moves.length;
+  const handleMoveSelect = (event) => {
 
-      let totalMoveCountMap = {};
-      let playersMoveCountMap = {};
-      let isEqual = false;
-      let opponentName = '';
-      let newGames = games;
-      newGames = newGames.filter(game => {
-        isEqual = true;
-        moves.some((move, key) => {
-          if (game.moves[key] != move) {
-            isEqual = false;
-            return false;
-          }
-        });
-        if (isEqual) {
-          if (!totalMoveCountMap[game.moves[moveNumber]]) {
-            totalMoveCountMap[game.moves[moveNumber]] = 1;
-          } else {
-            totalMoveCountMap[game.moves[moveNumber]]++;
-          }
+    let element = getElementAtEvent(chartRef.current, event)
 
-          if (playerOne == game.white) {
-            opponentName = game.black;
-          } else {
-            opponentName = game.white;
-          }
+    let newMove = labels[element[0].index];
+    moves.push(labels[element[0].index]);
+    let moveNumber = moves.length;
 
-          if (!playersMoveCountMap[opponentName]) {
-            playersMoveCountMap[opponentName] = {};
-          }
-          if (!playersMoveCountMap[opponentName][game.moves[moveNumber]]) {
-            playersMoveCountMap[opponentName][game.moves[moveNumber]] = 1;
-          } else {
-            playersMoveCountMap[opponentName][game.moves[moveNumber]]++;
-          }
-          return true;
+    let totalMoveCountMap = {};
+    let playersMoveCountMap = {};
+    let isEqual = false;
+    let opponentName = '';
+    let newGames = games;
+    newGames = newGames.filter(game => {
+      isEqual = true;
+      moves.some((move, key) => {
+        if (game.moves[key] != move) {
+          isEqual = false;
+          return false;
         }
-        return false;
       });
+      if (isEqual) {
+        if (!totalMoveCountMap[game.moves[moveNumber]]) {
+          totalMoveCountMap[game.moves[moveNumber]] = 1;
+        } else {
+          totalMoveCountMap[game.moves[moveNumber]]++;
+        }
 
-      generateChart(
-        totalMoveCountMap,
-        playersMoveCountMap,
-        newGames,
-        newMove
-      );
-    }
+        if (playerOne == game.white) {
+          opponentName = game.black;
+        } else {
+          opponentName = game.white;
+        }
+
+        if (!playersMoveCountMap[opponentName]) {
+          playersMoveCountMap[opponentName] = {};
+        }
+        if (!playersMoveCountMap[opponentName][game.moves[moveNumber]]) {
+          playersMoveCountMap[opponentName][game.moves[moveNumber]] = 1;
+        } else {
+          playersMoveCountMap[opponentName][game.moves[moveNumber]]++;
+        }
+        return true;
+      }
+      return false;
+    });
+
+    generateChart(
+      totalMoveCountMap,
+      playersMoveCountMap,
+      newGames,
+      newMove
+    );
   };
 
   const generateChart = (
@@ -251,6 +250,7 @@ function ChessChart() {
     let chessObj = chessObject;
     let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     if (newMove) {
+      console.log(newMove)
       chessObj.move(newMove);
       fen = chessObj.fen();
     }
@@ -368,32 +368,32 @@ function ChessChart() {
     }
   };
 
-  const getColorFilter = entry => {
+  const getColorFilter = (entry) => {
     if (mainPlayerColor == 'Both') {
       return (
-        (entry.white == playerOne ||
-          entry.black == playerOne) &&
-        (entry.white == playerTwo ||
-          entry.black == playerTwo ||
-          entry.white == playerThree ||
-          entry.black == playerThree ||
-          entry.white == playerFour ||
-          entry.black == playerFour)
+        (entry.white == playerOne.value ||
+          entry.black == playerOne.value) &&
+        (entry.white == playerTwo.value ||
+          entry.black == playerTwo.value ||
+          entry.white == playerThree.value ||
+          entry.black == playerThree.value ||
+          entry.white == playerFour.value ||
+          entry.black == playerFour.value)
       );
     }
-    if (mainPlayerColor == 'White') {
+    if (mainPlayerColor.value == 'White') {
       return (
-        entry.white == playerOne &&
-        (entry.black == playerTwo ||
-          entry.black == playerThree ||
-          entry.black == playerFour)
+        entry.white == playerOne.value &&
+        (entry.black == playerTwo.value ||
+          entry.black == playerThree.value ||
+          entry.black == playerFour.value)
       );
     } else {
       return (
-        entry.black == playerOne &&
-        (entry.white == playerTwo ||
-          entry.white == playerThree ||
-          entry.white == playerFour)
+        entry.black == playerOne.value &&
+        (entry.white == playerTwo.value ||
+          entry.white == playerThree.value ||
+          entry.white == playerFour.value)
       );
     }
   };
@@ -533,8 +533,9 @@ function ChessChart() {
       <ChartLayout>
         <DoughnutContainer>
           <Doughnut
+            ref={chartRef}
             data={radarData}
-            onClick={evt => {
+            onClick={(evt) => {
               handleMoveSelect(evt);
             }}
           ></Doughnut>
