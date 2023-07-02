@@ -40,10 +40,12 @@ function ChessChart() {
   const [games, setGames] = useState([])
   const [moves, setMoves] = useState([])
   const [notation, setNotation] = useState('')
+  const [radarData, setRadarData] = useState({ labels: [], datasets: [] })
   const [labels, setLabels] = useState([])
   const [datasets, setDatasets] = useState([])
 
   useEffect(() => {
+    const load = async () => {
     let totalMoveCountMap = {};
     let playersMoveCountMap = {};
 
@@ -91,8 +93,12 @@ function ChessChart() {
       }
     });
 
+    console.log(totalMoveCountMap)
+
     generateChart(totalMoveCountMap, playersMoveCountMap, newGames);
-  }, [])
+  }
+  load()
+}, [])
 
   const handleReset = () => {
     let totalMoveCountMap = {};
@@ -147,7 +153,6 @@ function ChessChart() {
   };
 
   const handleMoveSelect = event => {
-    console.log(event)
     if (event[0]) {
       let moves = moves;
       let newMove = labels[event[0]._index];
@@ -393,44 +398,53 @@ function ChessChart() {
     }
   };
 
-  const getGameNotation = (str) => {
-    if (!str.length) {
-      return '';
-    }
-    let final = '';
-    str.forEach((move, i) => {
-      if (i % 2 == 0) {
-        let moveNumber = i / 2 + 1;
-        final += moveNumber;
-        final += '. ';
-        final += move;
-      } else {
-        final += ', ';
-        final += move;
-        final += ' ';
+  useEffect(() => {
+    const load = async () => {
+      if (!moves.length) {
+        return '';
       }
-    });
-    return final;
-  };
+      let final = '';
+      moves.forEach((move, i) => {
+        if (i % 2 == 0) {
+          let moveNumber = i / 2 + 1;
+          final += moveNumber;
+          final += '. ';
+          final += move;
+        } else {
+          final += ', ';
+          final += move;
+          final += ' ';
+        }
+      });
+      setNotation(final);
+    }
+    load()
+  }, [moves])
 
-  let radarData = {
-    labels: labels,
-    datasets: datasets,
-  };
 
-  let doughnutData = JSON.parse(JSON.stringify(radarData));
-  doughnutData.datasets.forEach(circle => {
-    circle.backgroundColor = [
-      '#12b8da',
-      '#49997c',
-      '#027ab0',
-      '#e51a1a',
-      '#eed630',
-      '#66545e',
-      '#aa6f73',
-      '#c7bbc9',
-    ];
-  });
+  useEffect(() => {
+    const load = async () => {
+      let radarLabels = labels
+      let radarDatasets = datasets
+      radarDatasets.forEach(circle => {
+        circle.backgroundColor = [
+          '#12b8da',
+          '#49997c',
+          '#027ab0',
+          '#e51a1a',
+          '#eed630',
+          '#66545e',
+          '#aa6f73',
+          '#c7bbc9',
+        ];
+      });
+      setRadarData({
+        labels: radarLabels,
+        datasets: radarDatasets
+      })
+    }
+    load()
+  }, [labels, datasets])
 
   return (
     <Container>
@@ -519,14 +533,14 @@ function ChessChart() {
       <ChartLayout>
         <DoughnutContainer>
           <Doughnut
-            data={doughnutData}
+            data={radarData}
             onClick={evt => {
               handleMoveSelect(evt);
             }}
           ></Doughnut>
-          {/* <div style={{ marginTop: '5vh' }}>
-            &nbsp;{getGameNotation()}
-          </div> */}
+          <div style={{ marginTop: '5vh' }}>
+            &nbsp;{notation}
+          </div>
           <button style={{ marginTop: '2vh' }} onClick={handleReset}>
             Reset Moves
           </button>
