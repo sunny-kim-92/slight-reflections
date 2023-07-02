@@ -4,10 +4,6 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 class BothBar extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const info = {
       labels: [

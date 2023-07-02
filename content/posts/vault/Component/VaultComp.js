@@ -278,7 +278,7 @@ class VaultComp extends React.Component {
   }
 
   _parseDir = lt => {
-    if (lt == 'f') {
+    if (lt === 'f') {
       return 'Forwards'
     } else {
       return 'Backwards'
@@ -399,7 +399,7 @@ class VaultComp extends React.Component {
                           />
                           <RadioButtonLabel />
                           <div>
-                          {items.names[aI]}
+                            {items.names[aI]}
                           </div>
                         </Item>
                       );
@@ -423,36 +423,36 @@ class VaultComp extends React.Component {
                   </font>
                 </h2>
                 <div>
-                    <h3>
-                      Direction:{' '}
-                    </h3>
-                    <h3>
-                      Pre-Flight Turns:{' '}
-                    </h3>
-                    <h3>
-                      Saltos:{' '}
-                    </h3>
-                    <h3>
-                      Body Position:{' '}
-                    </h3>
-                    <h3>
-                      Flight Turns:{' '}
-                    </h3>
-                    <h3>
-                      <font color="green">{this._parseDir(currState.dir)}</font>
-                    </h3>
-                    <h3>
-                      <font color="purple">{this._parseTurn(currState.fTurn)}</font>
-                    </h3>
-                    <h3>
-                      <font color="orange">{this._parseTurn(currState.salto)}</font>
-                    </h3>
-                    <h3>
-                      <font color="pink">{this._parseBP(currState.bp)}</font>
-                    </h3>
-                    <h3>
-                      <font color="yellow">{this._parseTurn(currState.sTurn)}</font>
-                    </h3>
+                  <h3>
+                    Direction:{' '}
+                  </h3>
+                  <h3>
+                    Pre-Flight Turns:{' '}
+                  </h3>
+                  <h3>
+                    Saltos:{' '}
+                  </h3>
+                  <h3>
+                    Body Position:{' '}
+                  </h3>
+                  <h3>
+                    Flight Turns:{' '}
+                  </h3>
+                  <h3>
+                    <font color="green">{this._parseDir(currState.dir)}</font>
+                  </h3>
+                  <h3>
+                    <font color="purple">{this._parseTurn(currState.fTurn)}</font>
+                  </h3>
+                  <h3>
+                    <font color="orange">{this._parseTurn(currState.salto)}</font>
+                  </h3>
+                  <h3>
+                    <font color="pink">{this._parseBP(currState.bp)}</font>
+                  </h3>
+                  <h3>
+                    <font color="yellow">{this._parseTurn(currState.sTurn)}</font>
+                  </h3>
                 </div>
 
               </FinalContainer>

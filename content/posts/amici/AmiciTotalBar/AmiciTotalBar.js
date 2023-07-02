@@ -4,10 +4,6 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 class AmiciTotalBar extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const c2 = '#a8f0f6';
     const c3 = '#eab5b5';

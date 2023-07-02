@@ -70,7 +70,7 @@ const HighlightedCell = ({ value, style, ...restProps }) => (
 
 const Cell = props => <HighlightedCell {...props} />;
 
-export default () => {
+const JusticeTable = () => {
   const columns = [
     { name: 'State', title: 'State' },
     { name: 'Sotomayor', title: 'Sotomayor' },
@@ -100,3 +100,5 @@ export default () => {
     </ThemeProvider>
   );
 };
+
+export default JusticeTable

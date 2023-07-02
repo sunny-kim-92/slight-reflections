@@ -3,10 +3,6 @@ import React, { Component } from 'react';
 import { Container } from './sankeychart.css.js';
 
 class SankeyChart extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return (
       <Container>

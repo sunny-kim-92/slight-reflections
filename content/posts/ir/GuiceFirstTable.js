@@ -38,7 +38,7 @@ const HighlightedCell = ({ value, style, ...restProps }) => (
 
 const Cell = props => <HighlightedCell {...props} />;
 
-export default () => {
+const GuiceFirstTable = () => {
     const columns = [
         { name: 'Player', title: 'Player' },
         { name: 'RushAttempts', title: 'Rush Attempts' },
@@ -83,3 +83,5 @@ export default () => {
         </ThemeProvider>
     );
 };
+
+export default GuiceFirstTable;

@@ -16,5 +16,5 @@
     "./gatsby-node.ts",
     "./gatsby-config.ts",
     "./plugins/**/*"
-  ]
+, "content/helpers"  ]
 }

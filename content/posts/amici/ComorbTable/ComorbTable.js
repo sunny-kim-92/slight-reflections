@@ -67,7 +67,7 @@ const Cell = props => {
   return <HighlightedCell {...props} />;
 };
 
-export default () => {
+const ComorbTable = () => {
   const colArr = [
     { name: 'State', title: 'State' },
     { name: 'Texas', title: 'Texas' },
@@ -140,3 +140,5 @@ export default () => {
     </ThemeProvider>
   );
 };
+
+export default ComorbTable;
