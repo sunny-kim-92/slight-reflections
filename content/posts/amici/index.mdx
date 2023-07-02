@@ -1,0 +1,87 @@
+---
+title: States as Friends of the Court
+date: 2020-01-01
+tags:
+  - Data
+  - Interactive
+---
+
+import AmiciTotalBar from "./AmiciTotalBar/AmiciTotalBar";
+import BothBar from "./BothBar/BothBar";
+import CaseBar from "./CaseBar/CaseBar";
+import ComorbTable from "./ComorbTable/ComorbTable";
+import JusticeTable from "./JusticeTable/JusticeTable";
+import SankeyChart from "./SankeyChart/SankeyChart";
+
+
+States play an increasingly important role in the litigation and outcome of Supreme Court cases. The submission of [amicus briefs](http://www.techlawjournal.com/glossary/legal/amicus.htm) afford parties not directly involved with a case the ability to provide input on particular topics of legal interest. These documents are provided to Supreme Court Justices, who often cite these texts during oral arguments and opinions. To examine the breadth of this influence, I explored amicus briefs filed by states during the October 2018 Supreme Court term. Through this, we can identify a number of relationships both among states and between states and justices.
+
+*Since I don’t have access to major legal database tools like LexisNexus or CaseText, I wrote a number of programs for accumulating the data used for this article. I chiefly used web-scraping techniques designed for SCOTUSblog.com. [The code can be found here.](https://github.com/sunny-kim-92/amici-link) The total accumulated raw data, as well as numerous charts and tables, detailing the data collected [can be found here.](https://docs.google.com/spreadsheets/d/19ms2JFLqjp2bGO2YD_4uz_V35Wy2kYkLSMb_2pixFb0/edit?usp=sharing)*
+
+
+<br></br>
+
+**States filed amicus briefs for 28 cases during the October 2018 SCOTUS term. The following graphs displays the totals arranged by state and by Supreme Court case:**
+
+<AmiciTotalBar/>
+<CaseBar/>
+
+<br></br>
+
+**Use the following map to explore which states filed amicus briefs for each case. You can search or select from the dropdown menu:**
+
+
+
+<br></br>
+
+<br></br>
+
+Cases with the highest rates of state participation often deal directly with state issues. *[Franchise Tax Board of California v. Hyatt](https://www.scotusblog.com/case-files/cases/franchise-tax-board-of-california-v-hyatt-2/)* involves the sovereign immunity of states being sued in other state courts. *[Rucho v. Common Cause](https://www.scotusblog.com/case-files/cases/rucho-v-common-cause-2/)* was one of a number of cases this term challenging political gerrymandering in congressional districts. *[Tennessee Wine and Spirits Retailers Association v. Thomas](https://www.scotusblog.com/case-files/cases/tennessee-wine-spirits-retailers-association-v-blair/)* involved the ability of states to regulate alcohol sales by out-of-state sellers.
+
+States filed on opposing sides of the same case only four times (14.3% of cases in which at least one state filed an amicus brief) this term. In addition to the aforementioned *Rucho v. Common Cause*: *[North Carolina Department of Revenue v. The Kimberley Rice Kaestner 1992 Family Trust](https://www.scotusblog.com/case-files/cases/franchise-tax-board-of-california-v-hyatt-2/)* challenged interpretations of residency as pertaining to a state’s right to collect taxes on trust income. *[The American Legion v. The American Humanist Society](https://www.scotusblog.com/case-files/cases/the-american-legion-v-american-humanist-association/)* involves the various tests defining the boundaries of separation between church and state. The case concerned a 40-foot Latin Cross erected in Bladensburg, Maryland in 1925 as a memorial to fallen WWI veterans. *Frank v. Gaos* and *Department of Commerce v. Southern District of New York*, two other cases in which cases filed on opposing sides, were not included, as all or major portions of either case were remanded to lower courts.
+
+<BothBar/>
+
+<br></br>
+
+<br></br>
+
+We can attempt to measure the relationships between states and justices. We calculate a net score comprising the difference between cases in which justices voted on the same side of a given state and cases in which a justice and state opposed. We divide this score by the total number of cases in which any state filed, providing a simple normalized ratio consistent with each state’s total. These scores provide insight into the level of agreement or disagreement between justices and states.
+
+<br></br>
+
+**The following sortable table provides normalized net agreement scores. Ranging from -1 to 1, these scores measure the difference between cases in which a justice voted with the side of a state's amicus filing with cases in which justice voted against a state, divided by the total number of cases in which that state filed an amicus brief:**
+
+<JusticeTable/>
+
+<br></br>
+
+In addition to the relationship between states and justices, we attempt to analyze relationships between states. We calculate a net score of cases in which states filed in support of the same side subtracted by cases in which states filed on opposing sides.
+
+<br></br>
+
+**The following sortable table lists a net agreement score (Difference of SCOTUS cases in which states filed on the same side and cases in which states filed on opposing sides):**
+
+<ComorbTable/>
+
+<br></br>
+
+**Given that states filed on opposing sides on only 4 of the 28 cases, a negative net agreement score represents a particularly sharp divide in litigation this term. The following Sankey diagram displays states pairs with negative scores:**
+
+<SankeyChart/>
+
+<br></br>
+
+There are a number of surprising alignments of political ideology among the scores. Iowa, a state in which the Republicans hold complete state-wide (Governor, State Senate, State House) control and one that voted for Donald Trump in 2016, holds positive scores with a number of Democratic states. Perhaps one function of this is Tom Miller, Iowa's Attorney General and member of the Democratic Party. He has held the office since 1995, weathering multiple electoral shifts and political challengers to win nine straight Attorney General elections. His 24 years at the position is the longest continuous service among the 50 states. Interestingly, the Attorney General with the second-longest active streak, Jim Hood of Mississippi, is also a Democrat in a consistently Republican state.
+
+Notably, in addition to a general correlation between justices and like-minded states, there is a broad trend of lower scores for liberal justices than their conservative counterparts. This is perhaps a function of the conservative justices’ more favorable view towards the authority of states against the federal government. Such cases prompt a larger, more unified response from states, and in turn provides an appreciable impact on state-justice data.
+
+<br></br>
+
+*References*
+
+*Programs developed for data collection can be found at www.github.com/sunny-kim-92/amici-link*
+
+*www.scotusblog.com*
+
+*www.ballotopedia.org*

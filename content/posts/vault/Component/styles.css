@@ -1,0 +1,7 @@
+.toggle {
+    display: block;
+    margin: 20px auto 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
