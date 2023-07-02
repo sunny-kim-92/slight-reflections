@@ -13,7 +13,7 @@ import {
   DoughnutContainer,
   ChessboardContainer,
 } from './ChessChart.css';
-import Chessboard from 'chessboardjsx';
+import { Chessboard } from "react-chessboard";
 import * as ChessJS from "chess.js";
 import { data } from './complete';
 
@@ -551,13 +551,11 @@ function ChessChart() {
             Reset Moves
           </button>
         </DoughnutContainer>
-        <ChessboardContainer>
-          <Chessboard
-            allowDrag={() => false}
-            width={480}
-            position={fen}
-          ></Chessboard>
-        </ChessboardContainer>
+        <Chessboard
+          arePiecesDraggable={false}
+          boardWidth={480}
+          position={fen}
+        ></Chessboard>
       </ChartLayout>
       <GamesTable>
         <table

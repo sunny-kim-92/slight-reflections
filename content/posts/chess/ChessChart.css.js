@@ -8,6 +8,7 @@ export const Container = styled.div`
 export const ChartLayout = styled.div`
   display: flex;
   width: 100vw;
+  margin-top: 4vh;
   ${MEDIA.TABLET`
   display: block;
 `};
@@ -19,7 +20,8 @@ export const DoughnutContainer = styled.div`
   margin-right: 2vw;
   position: relative;
   ${MEDIA.TABLET`
-  width: 100%;
+  width: 90%;
+  margin-bottom: 20vh;
 `};
 `;
 
@@ -49,7 +51,7 @@ export const DropdownContainer = styled.div`
 `;
 
 export const GamesTable = styled.div`
-  margin-top: 8vh;
+  margin-top: 6vh;
   max-height: 30vh;
   overflow-y: auto;
   justify-content: center;
