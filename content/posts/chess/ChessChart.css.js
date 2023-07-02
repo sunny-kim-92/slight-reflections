@@ -14,8 +14,9 @@ export const ChartLayout = styled.div`
 `;
 
 export const DoughnutContainer = styled.div`
-  height: 40vh;
-  width: 40vw;
+  height: 60vh;
+  width: 24vw;
+  margin-right: 2vw;
   position: relative;
   ${MEDIA.TABLET`
   width: 100%;
@@ -25,6 +26,7 @@ export const DoughnutContainer = styled.div`
 export const ChessboardContainer = styled.div`
   ${MEDIA.TABLET`
   width: 100%;
+  margin-top: 25vh;
 `};
 `;
 

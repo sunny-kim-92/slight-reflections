@@ -1,17 +1,11 @@
 /** @jsx jsx */
-import { jsx } from "theme-ui"
+import { jsx, Heading, Flex } from "theme-ui"
 import { HeadFC, Link } from "gatsby"
 import Layout from "./layout"
-import Title from "./title"
 import Listing from "./listing"
-import List from "./list"
 import useMinimalBlogConfig from "../src/hooks/use-minimal-blog-config"
-import useSiteMetadata from "../src/hooks/use-site-metadata"
 import replaceSlashes from "../src/utils/replaceSlashes"
-import { visuallyHidden } from "../src/styles/utils"
 import Seo from "./seo"
-import Hero from "../texts/hero.mdx"
-import Bottom from "../texts/bottom.mdx"
 
 export type MBHomepageProps = {
   posts: {
@@ -29,16 +23,22 @@ export type MBHomepageProps = {
 }
 
 const Homepage = ({ posts }: MBHomepageProps) => {
-  const { basePath, blogPath } = useMinimalBlogConfig()
-  const { siteTitle } = useSiteMetadata()
+  const { basePath, tagsPath } = useMinimalBlogConfig()
 
   return (
     <Layout>
-      <h1 sx={visuallyHidden}>{siteTitle}</h1>
-      <Listing posts={posts} showTags={false} />
-      <List>
-        <Bottom />
-      </List>
+      <Flex sx={{ alignItems: `center`, justifyContent: `space-between`, flexFlow: `wrap` }}>
+        <Heading as="h1" variant="styles.h1" sx={{ marginY: 4 }}>
+          Articles
+        </Heading>
+        <Link
+          sx={(t) => ({ ...t.styles?.a, variant: `links.secondary`, marginY: 2 })}
+          to={replaceSlashes(`/${basePath}/${tagsPath}`)}
+        >
+          View all tags
+        </Link>
+      </Flex>
+      <Listing posts={posts} showTags={true} />
     </Layout>
   )
 }

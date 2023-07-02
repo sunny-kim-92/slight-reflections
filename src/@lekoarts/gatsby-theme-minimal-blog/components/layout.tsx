@@ -33,7 +33,6 @@ const Layout = ({ children, className = `` }: LayoutProps) => (
       <Box id="skip-nav" as="main" variant="layout.main" sx={{ ...CodeStyles }} className={className}>
         {children}
       </Box>
-      <Footer />
     </Container>
   </MDXProvider>
 )

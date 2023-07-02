@@ -9,7 +9,7 @@ const config: GatsbyConfig = {
     // You can also add new values here to query them like usual
     // See all options: https://github.com/LekoArts/gatsby-themes/blob/main/themes/gatsby-theme-minimal-blog/gatsby-config.mjs
     siteTitle: `Light Musings`,
-    siteTitleAlt: `Light Musings Alt`,
+    siteTitleAlt: `Light Musings`,
     siteHeadline: `Light Musings`,
     siteUrl: `https://light-musings.netlify.com`,
     siteDescription: ``,
@@ -24,10 +24,6 @@ const config: GatsbyConfig = {
       // See the theme's README for all available options
       options: {
         navigation: [
-          {
-            title: `Articles`,
-            slug: `/blog`,
-          },
           {
             title: `About`,
             slug: `/about`,

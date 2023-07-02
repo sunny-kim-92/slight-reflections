@@ -1,5 +1,5 @@
-import React, { Component, useRef, useState, useEffect } from 'react';
-import { Doughnut, getDatasetAtEvent, getElementAtEvent, getElementsAtEvent } from 'react-chartjs-2';
+import React, { useRef, useState, useEffect } from 'react';
+import { Doughnut, getElementAtEvent } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 
 import Dropdown from 'react-select';
@@ -20,6 +20,8 @@ import { data } from './complete';
 Chart.register(...registerables);
 const Chess = typeof ChessJS === "function" ? ChessJS : ChessJS.Chess;
 
+const chessObject = new Chess()
+
 function ChessChart() {
   const [playerOne, setPlayerOne] = useState({ value: 'Magnus_Carlsen', label: 'Magnus Carlsen' })
   const [playerTwo, setPlayerTwo] = useState({ value: 'Anish_Giri', label: 'Anish Giri' })
@@ -35,7 +37,6 @@ function ChessChart() {
     { value: 'Hikaru_Nakamura', label: 'Hikaru Nakamura' },
   ]
   const [mainPlayerColor, setMainPlayerColor] = useState({ value: 'Both', label: 'Both' })
-  const chessObject = new Chess()
   const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
   const [games, setGames] = useState([])
   const [moves, setMoves] = useState([])
@@ -148,6 +149,8 @@ function ChessChart() {
       }
     });
     setMoves([])
+    setNotation('')
+    chessObject.reset()
     generateChart(totalMoveCountMap, playersMoveCountMap, newGames);
   };
 
@@ -155,55 +158,57 @@ function ChessChart() {
 
     let element = getElementAtEvent(chartRef.current, event)
 
-    let newMove = labels[element[0].index];
-    moves.push(labels[element[0].index]);
-    let moveNumber = moves.length;
+    if (element[0]) {
+      let newMove = labels[element[0].index];
+      moves.push(labels[element[0].index]);
+      let moveNumber = moves.length;
 
-    let totalMoveCountMap = {};
-    let playersMoveCountMap = {};
-    let isEqual = false;
-    let opponentName = '';
-    let newGames = games;
-    newGames = newGames.filter(game => {
-      isEqual = true;
-      moves.some((move, key) => {
-        if (game.moves[key] != move) {
-          isEqual = false;
-          return false;
+      let totalMoveCountMap = {};
+      let playersMoveCountMap = {};
+      let isEqual = false;
+      let opponentName = '';
+      let newGames = games;
+      newGames = newGames.filter(game => {
+        isEqual = true;
+        moves.some((move, key) => {
+          if (game.moves[key] != move) {
+            isEqual = false;
+            return false;
+          }
+        });
+        if (isEqual) {
+          if (!totalMoveCountMap[game.moves[moveNumber]]) {
+            totalMoveCountMap[game.moves[moveNumber]] = 1;
+          } else {
+            totalMoveCountMap[game.moves[moveNumber]]++;
+          }
+
+          if (playerOne == game.white) {
+            opponentName = game.black;
+          } else {
+            opponentName = game.white;
+          }
+
+          if (!playersMoveCountMap[opponentName]) {
+            playersMoveCountMap[opponentName] = {};
+          }
+          if (!playersMoveCountMap[opponentName][game.moves[moveNumber]]) {
+            playersMoveCountMap[opponentName][game.moves[moveNumber]] = 1;
+          } else {
+            playersMoveCountMap[opponentName][game.moves[moveNumber]]++;
+          }
+          return true;
         }
+        return false;
       });
-      if (isEqual) {
-        if (!totalMoveCountMap[game.moves[moveNumber]]) {
-          totalMoveCountMap[game.moves[moveNumber]] = 1;
-        } else {
-          totalMoveCountMap[game.moves[moveNumber]]++;
-        }
 
-        if (playerOne == game.white) {
-          opponentName = game.black;
-        } else {
-          opponentName = game.white;
-        }
-
-        if (!playersMoveCountMap[opponentName]) {
-          playersMoveCountMap[opponentName] = {};
-        }
-        if (!playersMoveCountMap[opponentName][game.moves[moveNumber]]) {
-          playersMoveCountMap[opponentName][game.moves[moveNumber]] = 1;
-        } else {
-          playersMoveCountMap[opponentName][game.moves[moveNumber]]++;
-        }
-        return true;
-      }
-      return false;
-    });
-
-    generateChart(
-      totalMoveCountMap,
-      playersMoveCountMap,
-      newGames,
-      newMove
-    );
+      generateChart(
+        totalMoveCountMap,
+        playersMoveCountMap,
+        newGames,
+        newMove
+      );
+    }
   };
 
   const generateChart = (
@@ -247,12 +252,12 @@ function ChessChart() {
       newDatasets.push(tempOpponentMap);
     }
 
-    let chessObj = chessObject;
     let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     if (newMove) {
-      console.log(newMove)
-      chessObj.move(newMove);
-      fen = chessObj.fen();
+      console.log(chessObject.fen())
+      chessObject.move(newMove);
+      fen = chessObject.fen();
+      console.log(fen)
     }
 
     newGames.sort(sortGames);
@@ -419,7 +424,7 @@ function ChessChart() {
       setNotation(final);
     }
     load()
-  }, [moves])
+  }, [fen, moves])
 
 
   useEffect(() => {

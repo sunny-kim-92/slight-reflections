@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  height: 80vh;
 `
 
 export const Intro = styled.div`

@@ -39,10 +39,8 @@ const Post: React.FC<React.PropsWithChildren<PageProps<MBPostProps>>> = ({ data:
       {post.title}
     </Heading>
     <p sx={{ color: `secondary`, mt: 3, a: { color: `secondary` }, fontSize: [1, 1, 2] }}>
-      <time>{post.date}</time>
       {post.tags && (
         <React.Fragment>
-          {` — `}
           <ItemTags tags={post.tags} />
         </React.Fragment>
       )}
