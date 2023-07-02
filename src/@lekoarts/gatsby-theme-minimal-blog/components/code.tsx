@@ -2,7 +2,6 @@ import * as React from "react"
 import { useColorMode } from "theme-ui"
 import Highlight, { defaultProps } from "prism-react-renderer"
 import { calculateLinesToHighlight, getLanguage, GetLanguageInput } from "@lekoarts/themes-utils"
-import Copy from "./copy"
 import useMinimalBlogConfig from "../src/hooks/use-minimal-blog-config"
 import { lightTheme, darkTheme } from "../src/utils/prism-themes"
 
@@ -21,7 +20,7 @@ const Code = ({
   className: blockClassName,
   highlight = ``,
 }: CodeProps) => {
-  const { showLineNumbers, showCopyButton } = useMinimalBlogConfig()
+  const { showLineNumbers } = useMinimalBlogConfig()
   const [colorMode] = useColorMode<"light" | "dark">()
   const isDark = colorMode === `dark`
 
@@ -46,7 +45,6 @@ const Code = ({
               </div>
             )}
             <pre className={className} data-linenumber={shouldShowLineNumbers}>
-              {showCopyButton && <Copy content={codeString} fileName={title} />}
               <code className={`code-content language-${language}`}>
                 {tokens.map((line, i) => {
                   const lineProps = getLineProps({ line, key: i })
