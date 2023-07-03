@@ -72,101 +72,53 @@ class AmiciTotalBar extends Component {
           backgroundColor: colorArr,
           label: 'Total Amicus Filings',
           data: [
-            22,
-            22,
-            21,
-            17,
-            17,
-            16,
-            16,
-            15,
-            14,
-            14,
-            13,
-            13,
-            13,
-            12,
-            12,
-            12,
-            11,
-            11,
-            11,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            9,
-            9,
-            9,
-            9,
-            9,
-            9,
-            9,
-            9,
-            8,
-            8,
-            8,
-            7,
-            7,
-            7,
-            7,
-            7,
-            7,
-            7,
-            7,
-            7,
-            6,
-            6,
-            5,
-            5,
-            3,
-            0,
+            22, 22, 21, 17, 17, 16, 16, 15, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11, 11, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 5, 5, 3, 0,
           ],
         },
       ],
     };
 
     const options = {
-      title: {
-        display: true,
-        text: 'States by Total Amicus Briefs Filed',
-        fontSize: 18,
+      plugins: {
+        backgroundPlugin: {
+          color: '#1a202c',
+        },
+        legend: {
+          labels: {
+            color: 'white'
+          }
+        },
       },
-      legend: {
-        display: false,
-      },
+      responsive: true,
       scales: {
-        yAxes: [
-          {
-            ticks: {
-              fontSize: 10,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'State',
-            },
+        y:
+        {
+          grid: {
+            color: 'white',
+            lineWidth: 0.4
           },
-        ],
-        xAxes: [
-          {
-            gridLines: {
-              display: false,
-            },
-            ticks: {
-              min: 0,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'Total Amicus Briefs Filed',
-            },
+          ticks: {
+            fontSize: 10,
+            color: 'white'
           },
-        ],
+        },
+        x:
+        {
+          gridLines: {
+            display: false,
+          },
+          ticks: {
+            min: 0,
+            color: 'white',
+            font: {
+              size: 9
+            }
+          },
+        },
       },
     };
 
-    return <Bar data={data} options={options} />;
+    return <Bar data={data} options={options} style={{borderRadius: `12px` }}/>;
   }
 }
 

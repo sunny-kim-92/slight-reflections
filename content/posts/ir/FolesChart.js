@@ -1,7 +1,20 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+
+const backgroundPlugin = {
+  id: 'backgroundPlugin',
+  beforeDraw: (chart, args, options) => {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = options.color || '#1a202c';
+    ctx.fillRect(0, 0, chart.width, chart.height);
+    ctx.restore();
+  }
+};
+
+Chart.register(backgroundPlugin, ...registerables);
 
 class FolesChart extends Component {
   render() {
@@ -18,63 +31,49 @@ class FolesChart extends Component {
       datasets: [
         {
           label: 'Score (4 pts per Pass TD)',
-          yAxisID: 'A',
           data: [25.48, 8.52, 5.08, 15.66, 9.3, 30.94, 15.24],
           fill: false,
           borderColor: 'red',
         },
-        {
-          label: 'Weekly Rank',
-          yAxisID: 'B',
-          data: [4, 23, 30, 19, 23, 3, 16],
-          fill: false,
-          borderColor: 'blue',
-        },
       ],
     };
     const options = {
+      plugins: {
+        backgroundPlugin: {
+          color: '#1a202c'
+        },
+        legend: {
+          labels: {
+            color: 'white'
+          }
+        }
+      },
       responsive: true,
-      title: {
-        display: true,
-        text: 'Nick Foles Weekly Performance Since 2017 (Full games)',
-        fontSize: 18,
-      },
-      legend: {
-        display: false,
-      },
+
       scales: {
-        yAxes: [
-          {
-            id: 'A',
-            type: 'linear',
-            position: 'left',
-            ticks: {
-              min: 0,
-              max: 34,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'Points',
-            },
+        x:
+        {
+          gridLines: {
+            display: false,
           },
-          {
-            id: 'B',
-            type: 'linear',
-            position: 'right',
-            ticks: {
-              reverse: true,
-              min: 1,
-              max: 35,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'Weekly Rank',
-            },
+          ticks: {
+            min: 0,
+            color: 'white',
           },
-        ],
+        },
+        y:
+        {
+          grid: {
+            color: 'white',
+            lineWidth: 0.4
+          },
+          ticks: {
+            color: 'white'
+          },
+        },
       },
     };
-    return <Line data={data} options={options}></Line>;
+    return <Line data={data} options={options} style={{ borderRadius: `12px` }}></Line>;
   }
 }
 

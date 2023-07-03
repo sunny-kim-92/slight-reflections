@@ -7,8 +7,7 @@ class SankeyChart extends Component {
     return (
       <Container>
         <Chart
-          width={'92vw'}
-          height={'92vh'}
+          height={'80vh'}
           chartType="Sankey"
           data={[
             ['From', 'To', 'Net Cases Against'],

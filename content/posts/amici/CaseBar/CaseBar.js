@@ -54,81 +54,51 @@ class CaseBar extends Component {
         {
           backgroundColor: colorArr,
           label: 'Total Amicus Filings',
-          data: [
-            14,
-            14,
-            10,
-            6,
-            7,
-            15,
-            19,
-            36,
-            30,
-            6,
-            10,
-            17,
-            23,
-            27,
-            10,
-            46,
-            20,
-            25,
-            12,
-            18,
-            31,
-            19,
-            11,
-            20,
-            32,
-            12,
-            16,
-            20,
+          data: [14, 14, 10, 6, 7, 15, 19, 36, 30, 6, 10, 17, 23, 27, 10, 46, 20, 25, 12, 18, 31, 19, 11, 20, 32, 12, 16, 20,
           ],
         },
       ],
     };
 
     const options = {
-      responsive: true,
-      title: {
-        display: true,
-        text: 'Supreme Court Cases by Total Amicus Briefs Filed from States',
-        fontSize: 18,
-      },
-      legend: {
-        display: false,
+      plugins: {
+        backgroundPlugin: {
+          color: '#1a202c',
+        },
+        legend: {
+          labels: {
+            color: 'white'
+          }
+        },
       },
       scales: {
-        yAxes: [
-          {
-            ticks: {
-              fontSize: 10,
-              lineHeight: 0.9,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'Case',
-            },
+        x:
+        {
+          gridLines: {
+            display: false,
           },
-        ],
-        xAxes: [
-          {
-            gridLines: {
-              display: false,
-            },
-            ticks: {
-              min: 0,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'Total Amicus Briefs Filed',
-            },
+          ticks: {
+            min: 0,
+            color: 'white',
+            font: {
+              size: 9
+            }
           },
-        ],
+        },
+        y:
+        {
+          grid: {
+            color: 'white',
+            lineWidth: 0.4
+          },
+          ticks: {
+            color: 'white'
+          },
+        },
       },
     };
 
-    return <Bar data={info} options={options} />;
+    return <Bar data={info} options={options} style={{ marginTop: `12px`, borderRadius: `12px` }} />;
   }
 }
 

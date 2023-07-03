@@ -540,6 +540,11 @@ function ChessChart() {
           <Doughnut
             ref={chartRef}
             data={radarData}
+            options={{
+              plugins: {
+                backgroundPlugin: false
+              }
+            }}
             onClick={(evt) => {
               handleMoveSelect(evt);
             }}

@@ -1,7 +1,20 @@
 import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+
+const backgroundPlugin = {
+  id: 'backgroundPlugin',
+  beforeDraw: (chart, args, options) => {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = options.color || '#1a202c';
+    ctx.fillRect(0, 0, chart.width, chart.height);
+    ctx.restore();
+  }
+};
+
+Chart.register(backgroundPlugin, ...registerables);
 
 class BothBar extends Component {
   render() {
@@ -32,40 +45,43 @@ class BothBar extends Component {
     };
 
     const options = {
-      title: {
-        display: true,
-        text: 'Cases in which States Filed for both Petitioner and Respondent',
-        fontSize: 18,
-      },
-      legend: {
-        display: false,
+      plugins: {
+        backgroundPlugin: {
+          color: '#1a202c',
+        },
+        legend: {
+          labels: {
+            color: 'white'
+          }
+        },
       },
       scales: {
-        yAxes: [
-          {
-            scaleLabel: {
-              display: true,
-              labelString: 'Case',
-            },
+        y: {
+          grid: {
+            color: 'white',
+            lineWidth: 0.4
           },
-        ],
-        xAxes: [
-          {
-            gridLines: {
-              display: false,
-            },
-            ticks: {
-              min: 0,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'Total Amicus Briefs Filed',
-            },
+          ticks: {
+            color: 'white'
           },
-        ],
+        },
+        x:
+        {
+          gridLines: {
+            display: false,
+          },
+          ticks: {
+            min: 0,
+            color: 'white'
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'Total Amicus Briefs Filed',
+          },
+        },
       },
     };
-    return <Bar data={info} options={options} />;
+    return <Bar data={info} options={options} style={{ borderRadius: `12px` }} />;
   }
 }
 
