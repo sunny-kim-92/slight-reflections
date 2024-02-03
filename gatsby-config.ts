@@ -8,9 +8,9 @@ const config: GatsbyConfig = {
     // You can overwrite values here that are used for the SEO component
     // You can also add new values here to query them like usual
     // See all options: https://github.com/LekoArts/gatsby-themes/blob/main/themes/gatsby-theme-minimal-blog/gatsby-config.mjs
-    siteTitle: `Light Musings`,
-    siteTitleAlt: `Light Musings`,
-    siteHeadline: `Light Musings`,
+    siteTitle: `Slight Reflections`,
+    siteTitleAlt: `Slight Reflections`,
+    siteHeadline: `Slight Reflections`,
     siteUrl: `https://light-musings.netlify.com`,
     siteDescription: ``,
     siteImage: `/banner.jpg`,
@@ -42,9 +42,9 @@ const config: GatsbyConfig = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Light Musings`,
+        name: `Slight Reflections`,
         short_name: `light-musings`,
-        description: `Light Musings`,
+        description: `Slight Reflections`,
         start_url: `/`,
         background_color: `#fff`,
         // This will impact how browsers show your PWA/website
@@ -111,7 +111,7 @@ const config: GatsbyConfig = {
   }
 }`,
             output: `rss.xml`,
-            title: `Light Musings`,
+            title: `Slight Reflections`,
           },
         ],
       },
