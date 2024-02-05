@@ -56,6 +56,7 @@ export const GamesTable = styled.div`
   overflow-y: auto;
   justify-content: center;
   padding-bottom: 4px;
+  border-collapse: collapse;
 `;
 
 export const TableHeader = styled.td`

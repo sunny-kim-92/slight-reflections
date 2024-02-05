@@ -1,13 +1,15 @@
 /* eslint react/prop-types: 0 */
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { teamIds, teamsData, gamesData } from './data.js'
 import Paper from '@mui/material/Paper';
 import { ThemeProvider, createTheme } from '@mui/material';
 import {
     Grid,
     Table,
+    TableColumnResizing,
     TableHeaderRow,
 } from '@devexpress/dx-react-grid-material-ui';
-import { teamIds, teamsData, gamesData } from './data.js'
+import { SortingState, IntegratedSorting } from '@devexpress/dx-react-grid';
 import {
     TableCell,
     TableHeader,
@@ -22,6 +24,11 @@ const ACCELERATE = 1.2
 const DECELERATE = 0.5
 const MAX_ITERATIONS = 15000;
 const TOLERANCE = 1e-8;
+
+const theme = createTheme({
+    palette: {}
+});
+
 
 function signum(x) {
     if (x < 0)
@@ -42,33 +49,6 @@ class Team {
         this.sumGrades = 0.0
         this.sumExpectedGrades = 0.0
     }
-
-    updateLogit() {
-        const diff = this.sumGrades - this.sumExpectedGrades
-        if (signum(this.momentum) == signum(diff)) {
-            this.momentum *= ACCELERATE
-        }
-        else {
-            this.momentum *= -DECELERATE
-        }
-        this.logit += this.momentum
-        return Math.abs(diff) < TOLERANCE
-    }
-
-    addGrade(grade) {
-        this.gamesPlayed++
-        this.sumGrades += grade
-    }
-
-    addExpectedGrade(grade) {
-        this.sumExpectedGrades += grade
-    }
-
-    getPct() {
-        return this.gamesPlayed > 0
-            ? this.sumGrades / this.gamesPlayed
-            : 0
-    }
 }
 
 class Game {
@@ -88,9 +68,17 @@ class Game {
 }
 
 const Chart = () => {
-    const [games, setGames] = useState([]);
-
-    const handleChange = event => setGames(event.target.value);
+    const [games, setGames] = useState(gamesData);
+    const [teams, setTeams] = useState(teamsData);
+    const [defaultColumnWidths] = useState([
+        { columnName: 'name', width: '20%' },
+        { columnName: 'logit', width: '20%' },
+        { columnName: 'wins', width: '9%' },
+        { columnName: 'losses', width: '9%' },
+        { columnName: 'ties', width: '9%' },
+        { columnName: 'pointsFor', width: '12%' },
+        { columnName: 'pointsAgainst', width: '12%' },
+      ]);
 
     const teamNames = {
         1: 'Arizona Cardinals',
@@ -147,6 +135,51 @@ const Chart = () => {
     }
 
     // TEAM FUNCTIONS
+    function updateLogit(team) {
+        const diff = team.sumGrades - team.sumExpectedGrades
+        if (signum(team.momentum) == signum(diff)) {
+            team.momentum *= ACCELERATE
+        }
+        else {
+            team.momentum *= -DECELERATE
+        }
+        team.logit += team.momentum
+        const newTeams = teams.map((obj) => {
+            if (obj.id === team.id) {
+                obj.logit = team.logit
+            }
+        })
+        setTeams(newTeams)
+        return Math.abs(diff) < TOLERANCE
+    }
+
+    function addGrade(team, grade) {
+        team.gamesPlayed++
+        team.sumGrades += grade
+        const newTeams = teams.map((obj) => {
+            if (obj.id === team.id) {
+                obj.logit = team.logit
+            }
+        })
+        setTeams(newTeams)
+    }
+
+    function addExpectedGrade(team, grade) {
+        team.sumExpectedGrades += grade
+        const newTeams = teams.map((obj) => {
+            if (obj.id === team.id) {
+                obj.logit = team.logit
+            }
+        })
+        setTeams(newTeams)
+    }
+
+    function getPct(team) {
+        return team.gamesPlayed > 0
+            ? team.sumGrades / team.gamesPlayed
+            : 0
+    }
+
     function clearExpectedGrades() {
         teams.forEach((team) => {
             team.sumExpectedGrades = 0.0
@@ -163,32 +196,48 @@ const Chart = () => {
         return converged
     }
 
-    const teams = []
-
-    // Data
-    for (let team in teamIds) {
-        teams.push(new Team(team, teamIds[team], INITIAL_LOGIT, INITIAL_MOMENTUM))
-    }
-
-    let gameList = []
-    gamesData.forEach((game) => {
-        gameList.push(new Game(...game))
-    })
-    console.log(gameList)
-    setGames(gameList)
-
     // GAME FUNCTIONS
     function calculatePct(scale) {
         games.forEach((game) => {
             const teamOne = teams.find((team) => {
-                return team.id == game.teamOne
+                return team.id === game.teamOne
             })
             const teamTwo = teams.find((team) => {
-                return team.id == game.teamTwo
+                return team.id === game.teamTwo
             })
-            const grade = gradeScore(game, SCALE)
-            teamOne.addGrade(grade)
-            teamTwo.addGrade(1 - grade)
+            if (teamOne && teamTwo) {
+                const grade = gradeScore(game, SCALE)
+                addGrade(teamOne, grade)
+                addGrade(teamTwo, 1 - grade)
+                if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
+                    teamOne.wins = 0
+                    teamOne.losses = 0
+                    teamOne.ties = 0
+                    teamOne.pointsFor = 0
+                    teamOne.pointsAgainst = 0
+                }
+                if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
+                    teamTwo.wins = 0
+                    teamTwo.losses = 0
+                    teamTwo.ties = 0
+                    teamTwo.pointsFor = 0
+                    teamTwo.pointsAgainst = 0
+                }
+                if (game.scoreOne > game.scoreTwo) {
+                    teamOne.wins++
+                    teamTwo.losses++
+                } else if (game.scoreOne < game.scoreTwo) {
+                    teamOne.losses++
+                    teamTwo.wins++
+                } else {
+                    teamOne.ties++
+                    teamTwo.ties++
+                }
+                teamOne.pointsFor += game.scoreOne
+                teamOne.pointsAgainst += game.scoreTwo
+                teamTwo.pointsFor += game.scoreTwo
+                teamTwo.pointsAgainst += game.scoreOne
+            }
         })
     }
 
@@ -203,57 +252,121 @@ const Chart = () => {
                 const teamTwo = teams.find((team) => {
                     return team.id == game.teamTwo
                 })
-                const expectedGrade = expectedGradeScore(teamOne.logit, teamTwo.logit, scale)
-                teamOne.addExpectedGrade(expectedGrade)
-                teamTwo.addExpectedGrade(1.0 - expectedGrade)
+                if (teamOne && teamTwo) {
+                    const expectedGrade = expectedGradeScore(teamOne.logit, teamTwo.logit, scale)
+                    teamOne.addExpectedGrade(expectedGrade)
+                    teamTwo.addExpectedGrade(1.0 - expectedGrade)
+                }
             })
             converged = updateLogits()
         }
         return converged
     }
 
-    console.log(games)
     console.log(teams)
-
-    calculatePct(SCALE);
-    calculateLogit(SCALE);
-
+    const colors = [
+        '#FFFFFF',
+        '#FCFFFC',
+        '#EEFFEE',
+        '#E0FFE0',
+        '#D2FFD2',
+        '#C4FFC4',
+        '#B6FFB6',
+        '#A8FFA8',
+        '#9AFF9A',
+        '#8CFF8C',
+        '#7EFF7E',
+        '#70FF70',
+        '#62FF62',
+        '#54FF54',
+        '#46FF46',
+        '#38FF38',
+        '#2AFF2A',
+        '#1CFF1C',
+        '#0EFF0E',
+        '#00FF00',
+        '#00FF00',
+        '#00FF00',
+        '#00FF00',
+        '#00FF00',
+        '#00FF00',
+        '#00FF00',
+      ];
+    const HighlightedCell = ({ value, style, ...restProps }) => (
+        <Table.Cell
+          {...restProps}
+          style={{
+            fontSize: 12,
+          }}
+        >
+          <span>
+            {value}
+          </span>
+        </Table.Cell>
+      );
+    const Cell = props => {
+        return <HighlightedCell {...props} />;
+      };
+    const teamCols = [
+        { name: 'displayName', title: 'Team'},
+        { name: 'logit', title: 'Logit'},
+        { name: 'wins', title: 'Wins'},
+        { name: 'losses', title: 'Losses'},
+        { name: 'ties', title: 'Ties'},
+        { name: 'pointsFor', title: 'Points For'},
+        { name: 'pointsAgainst', title: 'Points Against'},
+    ]
     return (
-        <GamesTable>
-            <table
-                style={{
-                    width: '100%',
-                    justifyContent: 'center',
-                    borderCollapse: 'collapse',
-                }}
-            >
-                <thead>
-                    <tr style={{ width: '100%', justifyContent: 'center' }}>
-                        <TableHeader>Date</TableHeader>
-                        <TableHeader>Home</TableHeader>
-                        <TableHeader>Home Score</TableHeader>
-                        <TableHeader>Away</TableHeader>
-                        <TableHeader>Away Score</TableHeader>
-                    </tr>
-                </thead>
-                <tbody>
-                    {games.map((game, index) => {
-                        return (
-                            <tr
-                                key={index}
-                                style={{ width: '100%', justifyContent: 'center' }}
-                            >
-                                <TableCell>{game.date}</TableCell>
-                                <TableCell>{teamNames[game.teamOne]}</TableCell>
-                                <TableCell>{game.scoreOne}</TableCell>
-                                <TableCell>{teamNames[game.teamTwo]}</TableCell>
-                                <TableCell>{game.teamTwo}</TableCell>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-        </GamesTable>
+        <div>
+            <ThemeProvider theme={theme}>
+                <Paper>
+                    <Grid rows={teams} columns={teamCols}>
+                        <SortingState
+                            defaultSorting={[{ columnName: 'logit', direction: 'desc' }]}
+                        />
+                        <IntegratedSorting />
+                        <Table cellComponent={Cell} columnExtensions={defaultColumnWidths}/>
+                        {/* <TableColumnResizing defaultColumnWidths={defaultColumnWidths} /> */}
+                        <TableHeaderRow showSortingControls />
+                    </Grid>
+                </Paper>
+            </ThemeProvider>
+            <GamesTable>
+                <table
+                    style={{
+                        width: '100%',
+                        justifyContent: 'center',
+                        borderCollapse: 'collapse',
+                    }}
+                >
+                    <thead>
+                        <tr style={{ width: '100%', justifyContent: 'center' }}>
+                            <TableHeader>Date</TableHeader>
+                            <TableHeader>Home</TableHeader>
+                            <TableHeader>Home Score</TableHeader>
+                            <TableHeader>Away</TableHeader>
+                            <TableHeader>Away Score</TableHeader>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {games.map((game, index) => {
+                            return (
+                                <tr
+                                    key={index}
+                                    style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid'}}
+                                >
+                                    <TableCell>{game[4]}</TableCell>
+                                    <TableCell>{teamNames[game[0]]}</TableCell>
+                                    <TableCell>{game[2]}</TableCell>
+                                    <TableCell>{teamNames[game[1]]}</TableCell>
+                                    <TableCell>{game[3]}</TableCell>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </GamesTable>
+        </div>
     );
 };
 
