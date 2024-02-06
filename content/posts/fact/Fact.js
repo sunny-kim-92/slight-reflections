@@ -9,7 +9,7 @@ import {
     TableHeaderRow,
 } from '@devexpress/dx-react-grid-material-ui';
 import { SortingState, IntegratedSorting } from '@devexpress/dx-react-grid';
-import Select from 'react-select'
+import Select, { StylesConfig } from 'react-select'
 import {
     TableCell,
     TableHeader,
@@ -22,7 +22,7 @@ const INITIAL_MOMENTUM = 0.1
 const INITIAL_LOGIT = 0.9
 const ACCELERATE = 1.2
 const DECELERATE = 0.5
-const MAX_ITERATIONS = 15000;
+const MAX_ITERATIONS = 20;
 const TOLERANCE = 1e-8;
 
 const theme = createTheme({
@@ -39,41 +39,13 @@ function signum(x) {
         return 0.0;
 }
 
-class Team {
-    constructor(name, id, logit, momentum) {
-        this.name = name
-        this.id = id
-        this.logit = logit
-        this.momentum = momentum
-        this.gamesPlayed = 0
-        this.sumGrades = 0.0
-        this.sumExpectedGrades = 0.0
-    }
-}
-
-class Game {
-    teamOne;
-    teamTwo;
-    scoreOne;
-    scoreTwo;
-    date;
-
-    constructor(teamOne, teamTwo, scoreOne, scoreTwo, date) {
-        this.teamOne = teamOne
-        this.teamTwo = teamTwo
-        this.scoreOne = scoreOne
-        this.scoreTwo = scoreTwo
-        this.date = date
-    }
-}
-
 const Chart = () => {
     const [games, setGames] = useState(gamesData);
     const [teams, setTeams] = useState(teamsData);
     const [selectedTeamOne, setSelectedTeamOne] = useState(16)
     const [selectedTeamTwo, setSelectedTeamTwo] = useState(28)
-    const [teamOneScore, setTeamOneScore] = useState(0)
-    const [teamTwoScore, setTeamTwoScore] = useState(0)
+    const [teamOneScore, setTeamOneScore] = useState(null)
+    const [teamTwoScore, setTeamTwoScore] = useState(null)
     const [defaultColumnWidths] = useState([
         { columnName: 'name', width: '20%' },
         { columnName: 'logit', width: '20%' },
@@ -140,6 +112,7 @@ const Chart = () => {
 
     // TEAM FUNCTIONS
     function updateLogit(team) {
+        console.log(team)
         const diff = team.sumGrades - team.sumExpectedGrades
         if (signum(team.momentum) == signum(diff)) {
             team.momentum *= ACCELERATE
@@ -148,34 +121,16 @@ const Chart = () => {
             team.momentum *= -DECELERATE
         }
         team.logit += team.momentum
-        const newTeams = teams.map((obj) => {
-            if (obj.id === team.id) {
-                obj.logit = team.logit
-            }
-        })
-        setTeams(newTeams)
         return Math.abs(diff) < TOLERANCE
     }
 
     function addGrade(team, grade) {
-        team.gamesPlayed++
         team.sumGrades += grade
-        const newTeams = teams.map((obj) => {
-            if (obj.id === team.id) {
-                obj.logit = team.logit
-            }
-        })
-        setTeams(newTeams)
     }
 
     function addExpectedGrade(team, grade) {
+        team.gamesPlayed++
         team.sumExpectedGrades += grade
-        const newTeams = teams.map((obj) => {
-            if (obj.id === team.id) {
-                obj.logit = team.logit
-            }
-        })
-        setTeams(newTeams)
     }
 
     function getPct(team) {
@@ -190,24 +145,72 @@ const Chart = () => {
         })
     }
 
-    function updateLogits() {
+    function updateLogits(teamArr) {
         let converged = true
-        teams.forEach((team) => {
-            if (!team.updateLogit()) {
+        teamArr.forEach((team) => {
+            if (!updateLogit(team)) {
                 converged = false
             }
         })
+        setTeams(teamArr)
         return converged
+    }
+
+    function addPct(game){
+        const teamOne = teams.find((team) => {
+            return team.id === game[0]
+        })
+        const teamTwo = teams.find((team) => {
+            return team.id === game[1]
+        })
+        console.log(teamOne)
+        console.log(teamTwo)
+        if (teamOne && teamTwo) {
+            console.log('hey')
+            const grade = gradeScore(game, SCALE)
+            addGrade(teamOne, grade)
+            addGrade(teamTwo, 1 - grade)
+            if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
+                teamOne.wins = 0
+                teamOne.losses = 0
+                teamOne.ties = 0
+                teamOne.pointsFor = 0
+                teamOne.pointsAgainst = 0
+            }
+            if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
+                teamTwo.wins = 0
+                teamTwo.losses = 0
+                teamTwo.ties = 0
+                teamTwo.pointsFor = 0
+                teamTwo.pointsAgainst = 0
+            }
+            if (game[2] > game[3]) {
+                teamOne.wins++
+                teamTwo.losses++
+            } else if (game[3] < game[2]) {
+                teamOne.losses++
+                teamTwo.wins++
+            } else {
+                teamOne.ties++
+                teamTwo.ties++
+            }
+            teamOne.pointsFor += game.scoreOne
+            teamOne.pointsAgainst += game.scoreTwo
+            teamTwo.pointsFor += game.scoreTwo
+            teamTwo.pointsAgainst += game.scoreOne
+            let newTeams = [...teams]
+            setTeams(newTeams)
+        }
     }
 
     // GAME FUNCTIONS
     function calculatePct(scale) {
         games.forEach((game) => {
             const teamOne = teams.find((team) => {
-                return team.id === game.teamOne
+                return team.id === game[0]
             })
             const teamTwo = teams.find((team) => {
-                return team.id === game.teamTwo
+                return team.id === game[1]
             })
             if (teamOne && teamTwo) {
                 const grade = gradeScore(game, SCALE)
@@ -227,10 +230,10 @@ const Chart = () => {
                     teamTwo.pointsFor = 0
                     teamTwo.pointsAgainst = 0
                 }
-                if (game.scoreOne > game.scoreTwo) {
+                if (game[0] > game[1]) {
                     teamOne.wins++
                     teamTwo.losses++
-                } else if (game.scoreOne < game.scoreTwo) {
+                } else if (game[1] < game[0]) {
                     teamOne.losses++
                     teamTwo.wins++
                 } else {
@@ -247,54 +250,38 @@ const Chart = () => {
 
     function calculateLogit(scale) {
         let converged = false;
+        let newTeams = [...teams]
         for (let i = 0; i < MAX_ITERATIONS && !converged; i++) {
             clearExpectedGrades()
             games.forEach((game) => {
-                const teamOne = teams.find((team) => {
-                    return team.id == game.teamOne
+                const teamOne = newTeams.find((team) => {
+                    return team.id == game[0]
                 })
-                const teamTwo = teams.find((team) => {
-                    return team.id == game.teamTwo
+                const teamTwo = newTeams.find((team) => {
+                    return team.id == game[1]
                 })
                 if (teamOne && teamTwo) {
                     const expectedGrade = expectedGradeScore(teamOne.logit, teamTwo.logit, scale)
-                    teamOne.addExpectedGrade(expectedGrade)
-                    teamTwo.addExpectedGrade(1.0 - expectedGrade)
+                    addExpectedGrade(teamOne, expectedGrade)
+                    addExpectedGrade(teamTwo, 1.0 - expectedGrade)
+                    converged = updateLogits(newTeams)
                 }
             })
-            converged = updateLogits()
         }
         return converged
     }
 
-    const colors = [
-        '#FFFFFF',
-        '#FCFFFC',
-        '#EEFFEE',
-        '#E0FFE0',
-        '#D2FFD2',
-        '#C4FFC4',
-        '#B6FFB6',
-        '#A8FFA8',
-        '#9AFF9A',
-        '#8CFF8C',
-        '#7EFF7E',
-        '#70FF70',
-        '#62FF62',
-        '#54FF54',
-        '#46FF46',
-        '#38FF38',
-        '#2AFF2A',
-        '#1CFF1C',
-        '#0EFF0E',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-    ];
+    function addGame() {
+        console.log(teams)
+        setGames([...games, [parseInt(selectedTeamOne.value), parseInt(selectedTeamTwo.value), parseInt(teamOneScore), parseInt(teamTwoScore), null]])
+        setSelectedTeamOne('')
+        setSelectedTeamTwo('')
+        setTeamOneScore(null)
+        setTeamTwoScore(null)
+        addPct([parseInt(selectedTeamOne.value), parseInt(selectedTeamTwo.value), parseInt(teamOneScore), parseInt(teamTwoScore), null])
+        calculateLogit(SCALE)
+    }
+
     const HighlightedCell = ({ value, style, ...restProps }) => (
         <Table.Cell
             {...restProps}
@@ -319,6 +306,22 @@ const Chart = () => {
         { name: 'pointsFor', title: 'Points For' },
         { name: 'pointsAgainst', title: 'Points Against' },
     ]
+
+    const customStyles = {
+        option: provided => ({
+            ...provided,
+            color: 'black'
+        }),
+        control: provided => ({
+            ...provided,
+            color: 'black'
+        }),
+        singleValue: provided => ({
+            ...provided,
+            color: 'black'
+        })
+    }
+
     return (
         <div>
             <ThemeProvider theme={theme}>
@@ -329,7 +332,6 @@ const Chart = () => {
                         />
                         <IntegratedSorting />
                         <Table cellComponent={Cell} columnExtensions={defaultColumnWidths} />
-                        {/* <TableColumnResizing defaultColumnWidths={defaultColumnWidths} /> */}
                         <TableHeaderRow showSortingControls />
                     </Grid>
                 </Paper>
@@ -369,25 +371,26 @@ const Chart = () => {
                     </tbody>
                 </table>
             </GamesTable>
-            <select
-                value={selectedTeamOne}
-                onChange={e => setSelectedTeamOne(e.target.value)}
-            >
-                {Object.keys(teamNames).map((teamId, index) => {
-                    return (
-                        <option key={teamId} value={teamId}>{teamNames[teamId]}</option>
-                    )
-                })}
-            </select>
-            <input value={teamOneScore} onChange={e => setTeamOneScore(e.target.value)} />
             <Select
-                value={selectedTeamTwo}
-                onChange={e => setSelectedTeamTwo(e.target.value)}
+                value={selectedTeamOne}
+                onChange={e => setSelectedTeamOne(e)}
                 options={Object.keys(teamNames).map((teamId, index) => {
                     return { value: teamId, label: teamNames[teamId] }
-
                 })}
+                styles={customStyles}
+
             />
+            <input value={teamOneScore || ''} onChange={(e) => setTeamOneScore(e.target.value)} type="number"></input>
+            <Select
+                value={selectedTeamTwo}
+                onChange={e => setSelectedTeamTwo(e)}
+                options={Object.keys(teamNames).map((teamId, index) => {
+                    return { value: teamId, label: teamNames[teamId] }
+                })}
+                styles={customStyles}
+            />
+            <input value={teamTwoScore || ''} onChange={(e) => setTeamTwoScore(e.target.value)} type="number"></input>
+            <button onClick={addGame}>Submit</button>
         </div>
     );
 };
