@@ -1,15 +1,15 @@
 /* eslint react/prop-types: 0 */
 import React, { useRef, useState } from 'react';
-import { teamIds, teamsData, gamesData } from './data.js'
+import { teamsData, gamesData } from './data.js'
 import Paper from '@mui/material/Paper';
 import { ThemeProvider, createTheme } from '@mui/material';
 import {
     Grid,
     Table,
-    TableColumnResizing,
     TableHeaderRow,
 } from '@devexpress/dx-react-grid-material-ui';
 import { SortingState, IntegratedSorting } from '@devexpress/dx-react-grid';
+import Select from 'react-select'
 import {
     TableCell,
     TableHeader,
@@ -70,6 +70,10 @@ class Game {
 const Chart = () => {
     const [games, setGames] = useState(gamesData);
     const [teams, setTeams] = useState(teamsData);
+    const [selectedTeamOne, setSelectedTeamOne] = useState(16)
+    const [selectedTeamTwo, setSelectedTeamTwo] = useState(28)
+    const [teamOneScore, setTeamOneScore] = useState(0)
+    const [teamTwoScore, setTeamTwoScore] = useState(0)
     const [defaultColumnWidths] = useState([
         { columnName: 'name', width: '20%' },
         { columnName: 'logit', width: '20%' },
@@ -78,7 +82,7 @@ const Chart = () => {
         { columnName: 'ties', width: '9%' },
         { columnName: 'pointsFor', width: '12%' },
         { columnName: 'pointsAgainst', width: '12%' },
-      ]);
+    ]);
 
     const teamNames = {
         1: 'Arizona Cardinals',
@@ -263,7 +267,6 @@ const Chart = () => {
         return converged
     }
 
-    console.log(teams)
     const colors = [
         '#FFFFFF',
         '#FCFFFC',
@@ -291,30 +294,30 @@ const Chart = () => {
         '#00FF00',
         '#00FF00',
         '#00FF00',
-      ];
+    ];
     const HighlightedCell = ({ value, style, ...restProps }) => (
         <Table.Cell
-          {...restProps}
-          style={{
-            fontSize: 12,
-          }}
+            {...restProps}
+            style={{
+                fontSize: 12,
+            }}
         >
-          <span>
-            {value}
-          </span>
+            <span>
+                {value}
+            </span>
         </Table.Cell>
-      );
+    );
     const Cell = props => {
         return <HighlightedCell {...props} />;
-      };
+    };
     const teamCols = [
-        { name: 'displayName', title: 'Team'},
-        { name: 'logit', title: 'Logit'},
-        { name: 'wins', title: 'Wins'},
-        { name: 'losses', title: 'Losses'},
-        { name: 'ties', title: 'Ties'},
-        { name: 'pointsFor', title: 'Points For'},
-        { name: 'pointsAgainst', title: 'Points Against'},
+        { name: 'displayName', title: 'Team' },
+        { name: 'logit', title: 'Logit' },
+        { name: 'wins', title: 'Wins' },
+        { name: 'losses', title: 'Losses' },
+        { name: 'ties', title: 'Ties' },
+        { name: 'pointsFor', title: 'Points For' },
+        { name: 'pointsAgainst', title: 'Points Against' },
     ]
     return (
         <div>
@@ -325,7 +328,7 @@ const Chart = () => {
                             defaultSorting={[{ columnName: 'logit', direction: 'desc' }]}
                         />
                         <IntegratedSorting />
-                        <Table cellComponent={Cell} columnExtensions={defaultColumnWidths}/>
+                        <Table cellComponent={Cell} columnExtensions={defaultColumnWidths} />
                         {/* <TableColumnResizing defaultColumnWidths={defaultColumnWidths} /> */}
                         <TableHeaderRow showSortingControls />
                     </Grid>
@@ -353,7 +356,7 @@ const Chart = () => {
                             return (
                                 <tr
                                     key={index}
-                                    style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid'}}
+                                    style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid' }}
                                 >
                                     <TableCell>{game[4]}</TableCell>
                                     <TableCell>{teamNames[game[0]]}</TableCell>
@@ -366,6 +369,25 @@ const Chart = () => {
                     </tbody>
                 </table>
             </GamesTable>
+            <select
+                value={selectedTeamOne}
+                onChange={e => setSelectedTeamOne(e.target.value)}
+            >
+                {Object.keys(teamNames).map((teamId, index) => {
+                    return (
+                        <option key={teamId} value={teamId}>{teamNames[teamId]}</option>
+                    )
+                })}
+            </select>
+            <input value={teamOneScore} onChange={e => setTeamOneScore(e.target.value)} />
+            <Select
+                value={selectedTeamTwo}
+                onChange={e => setSelectedTeamTwo(e.target.value)}
+                options={Object.keys(teamNames).map((teamId, index) => {
+                    return { value: teamId, label: teamNames[teamId] }
+
+                })}
+            />
         </div>
     );
 };
