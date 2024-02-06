@@ -44,8 +44,8 @@ const Chart = () => {
     const [teams, setTeams] = useState(teamsData);
     const [selectedTeamOne, setSelectedTeamOne] = useState(16)
     const [selectedTeamTwo, setSelectedTeamTwo] = useState(28)
-    const [teamOneScore, setTeamOneScore] = useState(null)
-    const [teamTwoScore, setTeamTwoScore] = useState(null)
+    const [teamOneScore, setTeamOneScore] = useState(1)
+    const [teamTwoScore, setTeamTwoScore] = useState(33)
     const [defaultColumnWidths] = useState([
         { columnName: 'name', width: '20%' },
         { columnName: 'logit', width: '20%' },
@@ -92,7 +92,7 @@ const Chart = () => {
     }
 
     function gradeScore(game, scale) {
-        const margin = game.scoreOne - game.scoreTwo
+        const margin = game[2] - game[3]
 
         let grade = SCORE_WEIGHT * logit(margin * scale)
 
@@ -102,6 +102,7 @@ const Chart = () => {
     }
 
     function expectedGradeScore(logit1, logit2, scale) {
+        // console.log('logit1: ' + logit1 + ' logit2: ' + logit2)
         const diff = logit1 - logit2
         return logit(diff * scale)
     }
@@ -112,8 +113,12 @@ const Chart = () => {
 
     // TEAM FUNCTIONS
     function updateLogit(team) {
-        console.log(team)
+        // if(team.id === 2){
+        //     console.log(team)
+        // }
         const diff = team.sumGrades - team.sumExpectedGrades
+        // console.log(team.sumGrades)
+        // console.log(team.sumExpectedGrades)
         if (signum(team.momentum) == signum(diff)) {
             team.momentum *= ACCELERATE
         }
@@ -125,12 +130,12 @@ const Chart = () => {
     }
 
     function addGrade(team, grade) {
-        team.sumGrades += grade
+        team.gamesPlayed++
+        return team.sumGrades + grade
     }
 
     function addExpectedGrade(team, grade) {
-        team.gamesPlayed++
-        team.sumExpectedGrades += grade
+        return team.sumExpectedGrades + grade
     }
 
     function getPct(team) {
@@ -152,70 +157,67 @@ const Chart = () => {
                 converged = false
             }
         })
-        setTeams(teamArr)
         return converged
     }
 
-    function addPct(game){
-        const teamOne = teams.find((team) => {
-            return team.id === game[0]
-        })
-        const teamTwo = teams.find((team) => {
-            return team.id === game[1]
-        })
-        console.log(teamOne)
-        console.log(teamTwo)
-        if (teamOne && teamTwo) {
-            console.log('hey')
-            const grade = gradeScore(game, SCALE)
-            addGrade(teamOne, grade)
-            addGrade(teamTwo, 1 - grade)
-            if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
-                teamOne.wins = 0
-                teamOne.losses = 0
-                teamOne.ties = 0
-                teamOne.pointsFor = 0
-                teamOne.pointsAgainst = 0
-            }
-            if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
-                teamTwo.wins = 0
-                teamTwo.losses = 0
-                teamTwo.ties = 0
-                teamTwo.pointsFor = 0
-                teamTwo.pointsAgainst = 0
-            }
-            if (game[2] > game[3]) {
-                teamOne.wins++
-                teamTwo.losses++
-            } else if (game[3] < game[2]) {
-                teamOne.losses++
-                teamTwo.wins++
-            } else {
-                teamOne.ties++
-                teamTwo.ties++
-            }
-            teamOne.pointsFor += game.scoreOne
-            teamOne.pointsAgainst += game.scoreTwo
-            teamTwo.pointsFor += game.scoreTwo
-            teamTwo.pointsAgainst += game.scoreOne
-            let newTeams = [...teams]
-            setTeams(newTeams)
-        }
-    }
+    // function addPct(game){
+    //     const teamOne = teams.find((team) => {
+    //         return team.id === game[0]
+    //     })
+    //     const teamTwo = teams.find((team) => {
+    //         return team.id === game[1]
+    //     })
+    //     if (teamOne && teamTwo) {
+    //         console.log('hey')
+    //         const grade = gradeScore(game, SCALE)
+    //         addGrade(teamOne, grade)
+    //         addGrade(teamTwo, 1 - grade)
+    //         if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
+    //             teamOne.wins = 0
+    //             teamOne.losses = 0
+    //             teamOne.ties = 0
+    //             teamOne.pointsFor = 0
+    //             teamOne.pointsAgainst = 0
+    //         }
+    //         if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
+    //             teamTwo.wins = 0
+    //             teamTwo.losses = 0
+    //             teamTwo.ties = 0
+    //             teamTwo.pointsFor = 0
+    //             teamTwo.pointsAgainst = 0
+    //         }
+    //         if (game[2] > game[3]) {
+    //             teamOne.wins++
+    //             teamTwo.losses++
+    //         } else if (game[3] < game[2]) {
+    //             teamOne.losses++
+    //             teamTwo.wins++
+    //         } else {
+    //             teamOne.ties++
+    //             teamTwo.ties++
+    //         }
+    //         teamOne.pointsFor += game.scoreOne
+    //         teamOne.pointsAgainst += game.scoreTwo
+    //         teamTwo.pointsFor += game.scoreTwo
+    //         teamTwo.pointsAgainst += game.scoreOne
+    //         let newTeams = [...teams]
+    //         setTeams(newTeams)
+    //     }
+    // }
 
     // GAME FUNCTIONS
-    function calculatePct(scale) {
-        games.forEach((game) => {
-            const teamOne = teams.find((team) => {
+    function calculatePct(gameArr, teamArr) {
+        gameArr.forEach((game) => {
+            const teamOne = teamArr.find((team) => {
                 return team.id === game[0]
             })
-            const teamTwo = teams.find((team) => {
+            const teamTwo = teamArr.find((team) => {
                 return team.id === game[1]
             })
             if (teamOne && teamTwo) {
                 const grade = gradeScore(game, SCALE)
-                addGrade(teamOne, grade)
-                addGrade(teamTwo, 1 - grade)
+                teamOne.sumGrades = addGrade(teamOne, grade)
+                teamTwo.sumGrades = addGrade(teamTwo, 1 - grade)
                 if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
                     teamOne.wins = 0
                     teamOne.losses = 0
@@ -230,56 +232,74 @@ const Chart = () => {
                     teamTwo.pointsFor = 0
                     teamTwo.pointsAgainst = 0
                 }
-                if (game[0] > game[1]) {
+                if (game[2] > game[3]) {
                     teamOne.wins++
                     teamTwo.losses++
-                } else if (game[1] < game[0]) {
+                } else if (game[3] > game[2]) {
                     teamOne.losses++
                     teamTwo.wins++
                 } else {
                     teamOne.ties++
                     teamTwo.ties++
                 }
-                teamOne.pointsFor += game.scoreOne
-                teamOne.pointsAgainst += game.scoreTwo
-                teamTwo.pointsFor += game.scoreTwo
-                teamTwo.pointsAgainst += game.scoreOne
+                teamOne.pointsFor += game[2]
+                teamOne.pointsAgainst += game[3]
+                teamTwo.pointsFor += game[3]
+                teamTwo.pointsAgainst += game[2]
+                if(teamOne.id === 2){
+                    console.log(teamOne)
+                }
             }
         })
+        return teamArr
     }
 
-    function calculateLogit(scale) {
+    function calculateLogit(scale, gameArr, teamArr) {
         let converged = false;
-        let newTeams = [...teams]
-        for (let i = 0; i < MAX_ITERATIONS && !converged; i++) {
-            clearExpectedGrades()
-            games.forEach((game) => {
-                const teamOne = newTeams.find((team) => {
+            teamArr.forEach((team) => {
+                team.sumExpectedGrades = 0.0
+            })
+            gameArr.forEach((game) => {
+                const teamOne = teamArr.find((team) => {
                     return team.id == game[0]
                 })
-                const teamTwo = newTeams.find((team) => {
+                const teamTwo = teamArr.find((team) => {
                     return team.id == game[1]
                 })
                 if (teamOne && teamTwo) {
                     const expectedGrade = expectedGradeScore(teamOne.logit, teamTwo.logit, scale)
-                    addExpectedGrade(teamOne, expectedGrade)
-                    addExpectedGrade(teamTwo, 1.0 - expectedGrade)
-                    converged = updateLogits(newTeams)
+                    console.log('expected grade: ' + expectedGrade)
+                    teamOne.sumExpectedGrades += expectedGrade
+                    teamTwo.sumExpectedGrades = teamTwo.sumExpectedGrades + 1.0 - expectedGrade
+                    converged = updateLogits(teamArr)
                 }
             })
-        }
-        return converged
+        return teamArr
     }
 
     function addGame() {
-        console.log(teams)
-        setGames([...games, [parseInt(selectedTeamOne.value), parseInt(selectedTeamTwo.value), parseInt(teamOneScore), parseInt(teamTwoScore), null]])
+        let newGames = [...games, [parseInt(selectedTeamOne.value), parseInt(selectedTeamTwo.value), parseInt(teamOneScore), parseInt(teamTwoScore), null]]
+        setGames(newGames)
+        let newTeams = teams
+        newTeams.forEach((team) => {
+            team.logit = INITIAL_LOGIT
+            team.momentum = INITIAL_MOMENTUM
+            team.gamesPlayed = 0
+            team.sumGrades = 0.0
+            team.sumExpectedGrades = 0.0
+            team.wins = 0
+            team.losses = 0
+            team.pointsFor = 0
+            team.pointsAgainst = 0
+        })
         setSelectedTeamOne('')
         setSelectedTeamTwo('')
         setTeamOneScore(null)
         setTeamTwoScore(null)
-        addPct([parseInt(selectedTeamOne.value), parseInt(selectedTeamTwo.value), parseInt(teamOneScore), parseInt(teamTwoScore), null])
-        calculateLogit(SCALE)
+        // console.log(newTeams)
+        newTeams = calculatePct(newGames, newTeams)
+        // addPct([parseInt(selectedTeamOne.value), parseInt(selectedTeamTwo.value), parseInt(teamOneScore), parseInt(teamTwoScore), null])
+        newTeams = calculateLogit(SCALE, newGames, newTeams)
     }
 
     const HighlightedCell = ({ value, style, ...restProps }) => (
@@ -322,6 +342,7 @@ const Chart = () => {
         })
     }
 
+    // console.log(teams)
     return (
         <div>
             <ThemeProvider theme={theme}>
