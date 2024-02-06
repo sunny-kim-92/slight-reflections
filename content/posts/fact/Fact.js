@@ -267,34 +267,23 @@ const Chart = () => {
         return converged
     }
 
-    const colors = [
-        '#FFFFFF',
-        '#FCFFFC',
-        '#EEFFEE',
-        '#E0FFE0',
-        '#D2FFD2',
-        '#C4FFC4',
-        '#B6FFB6',
-        '#A8FFA8',
-        '#9AFF9A',
-        '#8CFF8C',
-        '#7EFF7E',
-        '#70FF70',
-        '#62FF62',
-        '#54FF54',
-        '#46FF46',
-        '#38FF38',
-        '#2AFF2A',
-        '#1CFF1C',
-        '#0EFF0E',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-        '#00FF00',
-    ];
+    function addGame(){
+        const newTeams = teamsData
+        newTeams.forEach((team) => {
+            team.pointsFor = 0
+            team.pointsAgainst = 0
+            team.momentum = INITIAL_MOMENTUM
+            team.logit = INITIAL_LOGIT
+            team.wins = 0
+            team.losses = 0
+            team.ties = 0
+            team.sumGrades = 0.0
+            team.sumExpectedGrades = 0.0
+            team.gamesPlayed = 0
+        })
+        const newGames = [...games, []]
+    }
+
     const HighlightedCell = ({ value, style, ...restProps }) => (
         <Table.Cell
             {...restProps}
@@ -307,9 +296,11 @@ const Chart = () => {
             </span>
         </Table.Cell>
     );
+
     const Cell = props => {
         return <HighlightedCell {...props} />;
     };
+    
     const teamCols = [
         { name: 'displayName', title: 'Team' },
         { name: 'logit', title: 'Logit' },
@@ -319,6 +310,22 @@ const Chart = () => {
         { name: 'pointsFor', title: 'Points For' },
         { name: 'pointsAgainst', title: 'Points Against' },
     ]
+
+    const customStyles = {
+        option: provided => ({
+          ...provided,
+          color: 'black'
+        }),
+        control: provided => ({
+          ...provided,
+          color: 'black'
+        }),
+        singleValue: provided => ({
+          ...provided,
+          color: 'black'
+        })
+      }
+      
     return (
         <div>
             <ThemeProvider theme={theme}>
@@ -369,25 +376,26 @@ const Chart = () => {
                     </tbody>
                 </table>
             </GamesTable>
-            <select
-                value={selectedTeamOne}
-                onChange={e => setSelectedTeamOne(e.target.value)}
-            >
-                {Object.keys(teamNames).map((teamId, index) => {
-                    return (
-                        <option key={teamId} value={teamId}>{teamNames[teamId]}</option>
-                    )
-                })}
-            </select>
-            <input value={teamOneScore} onChange={e => setTeamOneScore(e.target.value)} />
             <Select
-                value={selectedTeamTwo}
-                onChange={e => setSelectedTeamTwo(e.target.value)}
+                value={selectedTeamOne}
+                onChange={e => setSelectedTeamOne(e)}
                 options={Object.keys(teamNames).map((teamId, index) => {
                     return { value: teamId, label: teamNames[teamId] }
-
                 })}
+                styles={customStyles}
+
             />
+            <input value={teamOneScore || ''} onChange={(e) => setTeamOneScore(e.target.value)} type="number"></input>
+            <Select
+                value={selectedTeamTwo}
+                onChange={e => setSelectedTeamTwo(e)}
+                options={Object.keys(teamNames).map((teamId, index) => {
+                    return { value: teamId, label: teamNames[teamId] }
+                })}
+                styles={customStyles}
+            />
+            <input value={teamTwoScore || ''} onChange={(e) => setTeamTwoScore(e.target.value)} type="number"></input>
+            <button onClick={addGame}>Submit</button>
         </div>
     );
 };
