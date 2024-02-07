@@ -52,7 +52,7 @@ export const DropdownContainer = styled.div`
 
 export const GamesTable = styled.div`
   margin-top: 6vh;
-  max-height: 30vh;
+  max-height: 40vh;
   overflow-y: auto;
   justify-content: center;
   padding-bottom: 4px;
@@ -61,9 +61,9 @@ export const GamesTable = styled.div`
 
 export const TableHeader = styled.td`
   font-weight: bold;
+  color: black;
   background-color: #ededed;
   border: 1px solid;
-
   padding-left: 2vw;
   padding-right: 2vw;
 `;

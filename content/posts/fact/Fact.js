@@ -1,20 +1,14 @@
 /* eslint react/prop-types: 0 */
-import React, { useRef, useState } from 'react';
-import { teamsData, gamesData } from './data.js'
+import React, { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import { ThemeProvider, createTheme } from '@mui/material';
-import {
-    Grid,
-    Table,
-    TableHeaderRow,
-} from '@devexpress/dx-react-grid-material-ui';
+import { Grid, Table, TableHeaderRow } from '@devexpress/dx-react-grid-material-ui';
 import { SortingState, IntegratedSorting } from '@devexpress/dx-react-grid';
 import Select from 'react-select'
-import {
-    TableCell,
-    TableHeader,
-    GamesTable,
-} from './Fact.css';
+import { useForm, Controller } from "react-hook-form"
+
+import { TableCell, TableHeader, GamesTable } from './Fact.css';
+import { teamsData, teamNames, gamesData } from './data.js'
 
 const SCORE_WEIGHT = 0.5
 const SCALE = 0.112
@@ -22,13 +16,8 @@ const INITIAL_MOMENTUM = 0.1
 const INITIAL_LOGIT = 0.9
 const ACCELERATE = 1.2
 const DECELERATE = 0.5
-const MAX_ITERATIONS = 15000;
+const MAX_ITERATIONS = 100;
 const TOLERANCE = 1e-8;
-
-const theme = createTheme({
-    palette: {}
-});
-
 
 function signum(x) {
     if (x < 0)
@@ -39,32 +28,8 @@ function signum(x) {
         return 0.0;
 }
 
-class Team {
-    constructor(name, id, logit, momentum) {
-        this.name = name
-        this.id = id
-        this.logit = logit
-        this.momentum = momentum
-        this.gamesPlayed = 0
-        this.sumGrades = 0.0
-        this.sumExpectedGrades = 0.0
-    }
-}
-
-class Game {
-    teamOne;
-    teamTwo;
-    scoreOne;
-    scoreTwo;
-    date;
-
-    constructor(teamOne, teamTwo, scoreOne, scoreTwo, date) {
-        this.teamOne = teamOne
-        this.teamTwo = teamTwo
-        this.scoreOne = scoreOne
-        this.scoreTwo = scoreTwo
-        this.date = date
-    }
+function logit(x) {
+    return 1.0 / (1.0 + Math.exp(-x))
 }
 
 const Chart = () => {
@@ -72,8 +37,10 @@ const Chart = () => {
     const [teams, setTeams] = useState(teamsData);
     const [selectedTeamOne, setSelectedTeamOne] = useState(16)
     const [selectedTeamTwo, setSelectedTeamTwo] = useState(28)
-    const [teamOneScore, setTeamOneScore] = useState(0)
-    const [teamTwoScore, setTeamTwoScore] = useState(0)
+    const [teamOneScore, setTeamOneScore] = useState()
+    const [teamTwoScore, setTeamTwoScore] = useState()
+    const methods = useForm();
+    const [sorting, setSorting] = useState([{ columnName: 'logit', direction: 'desc' }]);
     const [defaultColumnWidths] = useState([
         { columnName: 'name', width: '20%' },
         { columnName: 'logit', width: '20%' },
@@ -83,192 +50,12 @@ const Chart = () => {
         { columnName: 'pointsFor', width: '12%' },
         { columnName: 'pointsAgainst', width: '12%' },
     ]);
+    const { getValues, handleSubmit, register, reset } = methods
 
-    const teamNames = {
-        1: 'Arizona Cardinals',
-        2: 'Atlanta Falcons',
-        3: 'Baltimore Ravens',
-        4: 'Buffalo Bills',
-        5: 'Carolina Panthers',
-        6: 'Chicago Bears',
-        7: 'Cincinnati Bengals',
-        8: 'Cleveland Browns',
-        9: 'Dallas Cowboys',
-        10: 'Denver Broncos',
-        11: 'Detroit Lions',
-        12: 'Green Bay Packers',
-        13: 'Houston Texans',
-        14: 'Indianapolis Colts',
-        15: 'Jacksonville Jaguars',
-        16: 'Kansas City Chiefs',
-        17: 'Las Vegas Raiders',
-        18: 'Los Angeles Chargers',
-        19: 'Los Angeles Rams',
-        20: 'Miami Dolphins',
-        21: 'Minnesota Vikings',
-        22: 'New England Patriots',
-        23: 'New Orleans Saints',
-        24: 'New York Giants',
-        25: 'New York Jets',
-        26: 'Philadelphia Eagles',
-        27: 'Pittsburgh Steelers',
-        28: 'San Francisco 49ers',
-        29: 'Seattle Seahawks',
-        30: 'Tampa Bay Buccaneers',
-        31: 'Tennessee Titans',
-        32: 'Washington Commanders'
-    }
-
-    function gradeScore(game, scale) {
-        const margin = game.scoreOne - game.scoreTwo
-
-        let grade = SCORE_WEIGHT * logit(margin * scale)
-
-        grade += (1.0 - SCORE_WEIGHT) * (1.0 + signum(margin)) * 0.5
-
-        return grade
-    }
-
-    function expectedGradeScore(logit1, logit2, scale) {
-        const diff = logit1 - logit2
-        return logit(diff * scale)
-    }
-
-    function logit(x) {
-        return 1.0 / (1.0 + Math.exp(-x))
-    }
-
-    // TEAM FUNCTIONS
-    function updateLogit(team) {
-        const diff = team.sumGrades - team.sumExpectedGrades
-        if (signum(team.momentum) == signum(diff)) {
-            team.momentum *= ACCELERATE
-        }
-        else {
-            team.momentum *= -DECELERATE
-        }
-        team.logit += team.momentum
-        const newTeams = teams.map((obj) => {
-            if (obj.id === team.id) {
-                obj.logit = team.logit
-            }
-        })
-        setTeams(newTeams)
-        return Math.abs(diff) < TOLERANCE
-    }
-
-    function addGrade(team, grade) {
-        team.gamesPlayed++
-        team.sumGrades += grade
-        const newTeams = teams.map((obj) => {
-            if (obj.id === team.id) {
-                obj.logit = team.logit
-            }
-        })
-        setTeams(newTeams)
-    }
-
-    function addExpectedGrade(team, grade) {
-        team.sumExpectedGrades += grade
-        const newTeams = teams.map((obj) => {
-            if (obj.id === team.id) {
-                obj.logit = team.logit
-            }
-        })
-        setTeams(newTeams)
-    }
-
-    function getPct(team) {
-        return team.gamesPlayed > 0
-            ? team.sumGrades / team.gamesPlayed
-            : 0
-    }
-
-    function clearExpectedGrades() {
-        teams.forEach((team) => {
-            team.sumExpectedGrades = 0.0
-        })
-    }
-
-    function updateLogits() {
-        let converged = true
-        teams.forEach((team) => {
-            if (!team.updateLogit()) {
-                converged = false
-            }
-        })
-        return converged
-    }
-
-    // GAME FUNCTIONS
-    function calculatePct(scale) {
-        games.forEach((game) => {
-            const teamOne = teams.find((team) => {
-                return team.id === game.teamOne
-            })
-            const teamTwo = teams.find((team) => {
-                return team.id === game.teamTwo
-            })
-            if (teamOne && teamTwo) {
-                const grade = gradeScore(game, SCALE)
-                addGrade(teamOne, grade)
-                addGrade(teamTwo, 1 - grade)
-                if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
-                    teamOne.wins = 0
-                    teamOne.losses = 0
-                    teamOne.ties = 0
-                    teamOne.pointsFor = 0
-                    teamOne.pointsAgainst = 0
-                }
-                if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
-                    teamTwo.wins = 0
-                    teamTwo.losses = 0
-                    teamTwo.ties = 0
-                    teamTwo.pointsFor = 0
-                    teamTwo.pointsAgainst = 0
-                }
-                if (game.scoreOne > game.scoreTwo) {
-                    teamOne.wins++
-                    teamTwo.losses++
-                } else if (game.scoreOne < game.scoreTwo) {
-                    teamOne.losses++
-                    teamTwo.wins++
-                } else {
-                    teamOne.ties++
-                    teamTwo.ties++
-                }
-                teamOne.pointsFor += game.scoreOne
-                teamOne.pointsAgainst += game.scoreTwo
-                teamTwo.pointsFor += game.scoreTwo
-                teamTwo.pointsAgainst += game.scoreOne
-            }
-        })
-    }
-
-    function calculateLogit(scale) {
-        let converged = false;
-        for (let i = 0; i < MAX_ITERATIONS && !converged; i++) {
-            clearExpectedGrades()
-            games.forEach((game) => {
-                const teamOne = teams.find((team) => {
-                    return team.id == game.teamOne
-                })
-                const teamTwo = teams.find((team) => {
-                    return team.id == game.teamTwo
-                })
-                if (teamOne && teamTwo) {
-                    const expectedGrade = expectedGradeScore(teamOne.logit, teamTwo.logit, scale)
-                    teamOne.addExpectedGrade(expectedGrade)
-                    teamTwo.addExpectedGrade(1.0 - expectedGrade)
-                }
-            })
-            converged = updateLogits()
-        }
-        return converged
-    }
-
-    function addGame(){
+    function addGame(data) {
         const newTeams = teamsData
+
+        //Reset team stats
         newTeams.forEach((team) => {
             team.pointsFor = 0
             team.pointsAgainst = 0
@@ -281,7 +68,98 @@ const Chart = () => {
             team.sumExpectedGrades = 0.0
             team.gamesPlayed = 0
         })
-        const newGames = [...games, []]
+
+        let newGames = [...games, [parseInt(data.teamOne.value), parseInt(data.teamTwo.value), parseInt(data.scoreOne), parseInt(data.scoreTwo), null]]
+        setGames(newGames)
+
+        newGames.forEach((game) => {
+            const teamOne = teams.find((team) => {
+                return team.id == game[0]
+            })
+            const teamTwo = teams.find((team) => {
+                return team.id == game[1]
+            })
+            let margin = game[2] - game[3]
+
+            let grade = SCORE_WEIGHT * logit(margin * SCALE)
+
+            grade += (1.0 - SCORE_WEIGHT) * (1.0 + signum(margin)) * 0.5
+
+            teamOne.sumGrades += grade
+            teamTwo.sumGrades = teamTwo.sumGrades + 1 - grade
+            teamOne.gamesPlayed++
+            teamTwo.gamesPlayed++
+            if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
+                teamOne.wins = 0
+                teamOne.losses = 0
+                teamOne.ties = 0
+                teamOne.pointsFor = 0
+                teamOne.pointsAgainst = 0
+            }
+            if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
+                teamTwo.wins = 0
+                teamTwo.losses = 0
+                teamTwo.ties = 0
+                teamTwo.pointsFor = 0
+                teamTwo.pointsAgainst = 0
+            }
+
+            //Add wins-losses-ties
+            if (game[2] > game[3]) {
+                teamOne.wins++
+                teamTwo.losses++
+            } else if (game[2] < game[3]) {
+                teamOne.losses++
+                teamTwo.wins++
+            } else {
+                teamOne.ties++
+                teamTwo.ties++
+            }
+
+            //Points for-against
+            teamOne.pointsFor += game[2]
+            teamOne.pointsAgainst += game[3]
+            teamTwo.pointsFor += game[3]
+            teamTwo.pointsAgainst += game[2]
+        })
+
+        for (let i = 0; i < MAX_ITERATIONS; i++) {
+            newTeams.forEach((team) => {
+                team.sumExpectedGrades = 0.0
+            })
+            //Update ranking stats
+            newGames.forEach((game) => {
+                const teamOne = teams.find((team) => {
+                    return team.id == game[0]
+                })
+                const teamTwo = teams.find((team) => {
+                    return team.id == game[1]
+                })
+                const diff = teamOne.logit - teamTwo.logit
+                const expectedGrade = logit(diff * SCALE)
+                teamOne.sumExpectedGrades += expectedGrade
+                teamTwo.sumExpectedGrades = teamTwo.sumExpectedGrades + 1.0 - expectedGrade
+            })
+            newTeams.forEach((team) => {
+                const diff = team.sumGrades - team.sumExpectedGrades
+                if (signum(team.momentum) == signum(diff)) {
+                    team.momentum *= ACCELERATE
+                }
+                else {
+                    team.momentum *= -DECELERATE
+                }
+                team.logit += team.momentum
+            })
+        }
+
+        setTeams(newTeams)
+        setSorting([{ columnName: 'logit', direction: 'desc' }])
+        reset({
+            teamOne: '',
+            scoreOne: '',
+            teamTwo: '',
+            scoreTwo: ''
+        })
     }
 
     const HighlightedCell = ({ value, style, ...restProps }) => (
@@ -300,7 +178,7 @@ const Chart = () => {
     const Cell = props => {
         return <HighlightedCell {...props} />;
     };
-    
+
     const teamCols = [
         { name: 'displayName', title: 'Team' },
         { name: 'logit', title: 'Logit' },
@@ -311,36 +189,125 @@ const Chart = () => {
         { name: 'pointsAgainst', title: 'Points Against' },
     ]
 
+    //Select styling
     const customStyles = {
         option: provided => ({
-          ...provided,
-          color: 'black'
+            ...provided,
+            color: 'black'
         }),
         control: provided => ({
-          ...provided,
-          color: 'black'
+            ...provided,
+            color: 'black'
         }),
         singleValue: provided => ({
-          ...provided,
-          color: 'black'
+            ...provided,
+            color: 'black'
         })
-      }
-      
+    }
+
+    //Theme styling
+    const theme = createTheme({ palette: {} });
+
     return (
         <div>
             <ThemeProvider theme={theme}>
                 <Paper>
                     <Grid rows={teams} columns={teamCols}>
                         <SortingState
-                            defaultSorting={[{ columnName: 'logit', direction: 'desc' }]}
+                            sorting={sorting}
+                            onSortingChange={setSorting}
                         />
                         <IntegratedSorting />
                         <Table cellComponent={Cell} columnExtensions={defaultColumnWidths} />
-                        {/* <TableColumnResizing defaultColumnWidths={defaultColumnWidths} /> */}
                         <TableHeaderRow showSortingControls />
                     </Grid>
                 </Paper>
             </ThemeProvider>
+            <form onSubmit={handleSubmit(addGame)}>
+                <Controller
+                    control={methods.control}
+                    name="teamOne"
+                    rules={{ required: true }}
+                    render={renderProps => {
+                        const { ref, ...rest } = renderProps.field;
+                        return (
+                            <label>Home
+                                <Select
+                                    {...register("teamOne", {
+                                        required: true, validate: {
+                                            notSameTeam: (team) => {
+                                                return (getValues("teamTwo")
+                                                    && team == getValues("teamTwo").value)
+                                            }
+                                        }
+                                    })}
+                                    options={Object.keys(teamNames).map((teamId, index) => {
+                                        return { value: teamId, label: teamNames[teamId] }
+                                    })}
+                                    {...renderProps.field}
+                                    onChange={e => {
+                                        renderProps.field.onChange(e);
+                                    }}
+                                    styles={customStyles}
+                                />
+                            </label>
+                        )
+                    }}
+                />
+                <label>Score
+                    <br />
+                    <input
+                        {...register("scoreOne", { required: true, pattern: /^[0-9]+/i })}
+                        type="number"></input>
+                </label>
+                <br />
+                <br />
+                <Controller
+                    control={methods.control}
+                    name="teamTwo"
+                    rules={{ required: true }}
+                    render={renderProps => {
+                        const { ref, ...rest } = renderProps.field;
+                        return (
+                            <label>Away
+                                <Select
+                                    {...register("teamTwo", {
+                                        required: true, validate: {
+                                            notSameTeam: (team) => {
+                                                return (getValues("teamOne")
+                                                    && team == getValues("teamOne").value)
+                                            }
+                                        }
+                                    })}
+                                    options={Object.keys(teamNames).map((teamId, index) => {
+                                        return { value: teamId, label: teamNames[teamId] }
+                                    })}
+                                    {...renderProps.field}
+                                    onChange={e => {
+                                        renderProps.field.onChange(e);
+                                    }}
+                                    styles={customStyles}
+                                />
+                            </label>
+                        )
+                    }}
+                />
+                <label>Score
+                    <br />
+                    <input
+                        {...register("scoreTwo", { required: true, pattern: /^[0-9]+/i })}
+                        type="number"></input>
+                </label>
+                <button type="submit">Submit</button>
+                <button onClick={() => {
+                    reset(() => ({
+                        teamOne: '',
+                        scoreOne: '',
+                        teamTwo: '',
+                        scoreTwo: ''
+                    }))
+                }}>Reset</button>
+            </form>
             <GamesTable>
                 <table
                     style={{
@@ -376,26 +343,6 @@ const Chart = () => {
                     </tbody>
                 </table>
             </GamesTable>
-            <Select
-                value={selectedTeamOne}
-                onChange={e => setSelectedTeamOne(e)}
-                options={Object.keys(teamNames).map((teamId, index) => {
-                    return { value: teamId, label: teamNames[teamId] }
-                })}
-                styles={customStyles}
-
-            />
-            <input value={teamOneScore || ''} onChange={(e) => setTeamOneScore(e.target.value)} type="number"></input>
-            <Select
-                value={selectedTeamTwo}
-                onChange={e => setSelectedTeamTwo(e)}
-                options={Object.keys(teamNames).map((teamId, index) => {
-                    return { value: teamId, label: teamNames[teamId] }
-                })}
-                styles={customStyles}
-            />
-            <input value={teamTwoScore || ''} onChange={(e) => setTeamTwoScore(e.target.value)} type="number"></input>
-            <button onClick={addGame}>Submit</button>
         </div>
     );
 };
