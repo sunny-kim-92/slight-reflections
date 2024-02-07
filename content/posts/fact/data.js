@@ -37,10 +37,10 @@ module.exports = {
         {
             name: 'arizona_cardinals',
             id: 1,
-            logit: -3.803,
+            logit: -3.798,
             momentum: 2.138799126214994e-9,
             gamesPlayed: 17,
-            sumGrades: 4.941257479243575,
+            sumGrades: 4.941,
             sumExpectedGrades: 4.941257478016309,
             wins: 4,
             losses: 13,
@@ -52,7 +52,7 @@ module.exports = {
         {
             name: 'atlanta_falcons',
             id: 2,
-            logit: -2.349,
+            logit: -2.343,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 17,
             sumGrades: 7.2736498128581974,
@@ -67,7 +67,7 @@ module.exports = {
         {
             name: 'baltimore_ravens',
             id: 3,
-            logit: 13.939,
+            logit: 13.945,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 19,
             sumGrades: 13.690605662539562,
@@ -82,7 +82,7 @@ module.exports = {
         {
             name: 'buffalo_bills',
             id: 4,
-            logit: 7.358,
+            logit: 7.363,
             momentum: 2.138799126214994e-9,
             gamesPlayed: 19,
             sumGrades: 12.038591792085965,
@@ -97,7 +97,7 @@ module.exports = {
         {
             name: 'carolina_panthers',
             id: 5,
-            logit: -10.017,
+            logit: -10.011,
             momentum: -2.956675912079608e-8,
             gamesPlayed: 17,
             sumGrades: 3.3227505605765337,
@@ -112,7 +112,7 @@ module.exports = {
         {
             name: 'chicago_bears',
             id: 6,
-            logit: -0.376,
+            logit: -0.370,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 17,
             sumGrades: 7.553952894712254,
@@ -127,7 +127,7 @@ module.exports = {
         {
             name: 'cincinnati_bengals',
             id: 7,
-            logit: 6.418,
+            logit: 6.423,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 17,
             sumGrades: 8.653086440882538,
@@ -142,7 +142,7 @@ module.exports = {
         {
             name: 'cleveland_browns',
             id: 8,
-            logit: 7.214,
+            logit: 7.219,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 18,
             sumGrades: 10.08654383570967,
@@ -157,7 +157,7 @@ module.exports = {
         {
             name: 'dallas_cowboys',
             id: 9,
-            logit: 7.144,
+            logit: 7.151,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 18,
             sumGrades: 11.795957982591375,
@@ -172,7 +172,7 @@ module.exports = {
         {
             name: 'denver_broncos',
             id: 10,
-            logit: 1.421,
+            logit: 1.426,
             momentum: 2.138799126214994e-9,
             gamesPlayed: 17,
             sumGrades: 7.955689435721095,
@@ -187,7 +187,7 @@ module.exports = {
         {
             name: 'detroit_lions',
             id: 11,
-            logit: 8.865,
+            logit: 8.870,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 20,
             sumGrades: 12.931672067195416,
@@ -202,7 +202,7 @@ module.exports = {
         {
             name: 'green_bay_packers',
             id: 12,
-            logit: 4.213,
+            logit: 4.219,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 19,
             sumGrades: 10.207470565813994,
@@ -217,7 +217,7 @@ module.exports = {
         {
             name: 'houston_texans',
             id: 13,
-            logit: 5.212,
+            logit: 5.218,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 19,
             sumGrades: 10.502436897578113,
@@ -232,7 +232,7 @@ module.exports = {
         {
             name: 'indianapolis_colts',
             id: 14,
-            logit: 3.165,
+            logit: 3.171,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 17,
             sumGrades: 8.604473649945268,
@@ -247,7 +247,7 @@ module.exports = {
         {
             name: 'jacksonville_jaguars',
             id: 15,
-            logit: 5.170,
+            logit: 5.175,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 17,
             sumGrades: 8.883493542192419,
@@ -262,7 +262,7 @@ module.exports = {
         {
             name: 'kansas_city_chiefs',
             id: 16,
-            logit: 9.377,
+            logit: 9.382,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 20,
             sumGrades: 13.142290153993908,
@@ -277,7 +277,7 @@ module.exports = {
         {
             name: 'las_vegas_raiders',
             id: 17,
-            logit: 1.637,
+            logit: 1.643,
             momentum: 2.138799126214994e-9,
             gamesPlayed: 17,
             sumGrades: 8.060615711069568,
@@ -292,7 +292,7 @@ module.exports = {
         {
             name: 'los_angeles_chargers',
             id: 18,
-            logit: -1.202,
+            logit: -1.196,
             momentum: 2.138799126214994e-9,
             gamesPlayed: 17,
             sumGrades: 6.320159576049074,
@@ -307,7 +307,7 @@ module.exports = {
         {
             name: 'los_angeles_rams',
             id: 19,
-            logit: 6.035,
+            logit: 6.041,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 18,
             sumGrades: 9.76397603194826,
@@ -322,7 +322,7 @@ module.exports = {
         {
             name: 'miami_dolphins',
             id: 20,
-            logit: 5.194,
+            logit: 5.200,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 18,
             sumGrades: 10.67274720994017,
@@ -337,7 +337,7 @@ module.exports = {
         {
             name: 'minnesota_vikings',
             id: 21,
-            logit: 1.094,
+            logit: 1.100,
             momentum: 2.138799126214994e-9,
             gamesPlayed: 17,
             sumGrades: 7.579260511922998,
@@ -352,7 +352,7 @@ module.exports = {
         {
             name: 'new_england_patriots',
             id: 22,
-            logit: -5.486,
+            logit: -5.480,
             momentum: -2.956675912079608e-8,
             gamesPlayed: 17,
             sumGrades: 5.005786795094391,
@@ -367,7 +367,7 @@ module.exports = {
         {
             name: 'new_orleans_saints',
             id: 23,
-            logit: 2.194,
+            logit: 2.199,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 17,
             sumGrades: 9.258685813744993,
@@ -382,7 +382,7 @@ module.exports = {
         {
             name: 'new_york_giants',
             id: 24,
-            logit: -3.187,
+            logit: -3.181,
             momentum: -2.956675912079608e-8,
             gamesPlayed: 17,
             sumGrades: 6.097721193564865,
@@ -397,7 +397,7 @@ module.exports = {
         {
             name: 'new_york_jets',
             id: 25,
-            logit: -1.249,
+            logit: -1.243,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 17,
             sumGrades: 6.9996102297665175,
@@ -412,7 +412,7 @@ module.exports = {
         {
             name: 'philadelphia_eagles',
             id: 26,
-            logit: 4.205,
+            logit: 4.210,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 18,
             sumGrades: 10.003843653755283,
@@ -427,7 +427,7 @@ module.exports = {
         {
             name: 'pittsburgh_steelers',
             id: 27,
-            logit: 5.792,
+            logit: 5.798,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 18,
             sumGrades: 9.246489824708553,
@@ -442,7 +442,7 @@ module.exports = {
         {
             name: 'san_francisco_49ers',
             id: 28,
-            logit: 12.558,
+            logit: 12.564,
             momentum: -5.133117902915986e-9,
             gamesPlayed: 19,
             sumGrades: 13.634685592773176,
@@ -457,7 +457,7 @@ module.exports = {
         {
             name: 'seattle_seahawks',
             id: 29,
-            logit: 3.738,
+            logit: 3.743,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 17,
             sumGrades: 8.479968986309638,
@@ -472,7 +472,7 @@ module.exports = {
         {
             name: 'tampa_bay_buccaneers',
             id: 30,
-            logit: 3.607,
+            logit: 3.613,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 19,
             sumGrades: 10.09140781347171,
@@ -487,7 +487,7 @@ module.exports = {
         {
             name: 'tennessee_titans',
             id: 31,
-            logit: -0.608,
+            logit: -0.603,
             momentum: 1.2319482966998367e-8,
             gamesPlayed: 17,
             sumGrades: 6.599634075144563,
@@ -502,7 +502,7 @@ module.exports = {
         {
             name: 'washington_commanders',
             id: 32,
-            logit: -7.144,
+            logit: -7.139,
             momentum: -2.956675912079608e-8,
             gamesPlayed: 17,
             sumGrades: 4.601484207096365,
