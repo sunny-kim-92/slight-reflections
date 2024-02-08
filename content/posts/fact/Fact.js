@@ -1,12 +1,7 @@
 /* eslint react/prop-types: 0 */
 import React, { useState } from 'react';
-import Paper from '@mui/material/Paper';
-import { ThemeProvider, createTheme } from '@mui/material';
-import { Grid, Table, TableHeaderRow } from '@devexpress/dx-react-grid-material-ui';
-import { DataTypeProvider, SortingState, IntegratedSorting } from '@devexpress/dx-react-grid';
 import Select from 'react-select'
 import { useForm, Controller } from "react-hook-form"
-
 import { TableCell, TableHeader, GamesTable } from './Fact.css';
 import { teamsData, teamNames, gamesData } from './data.js'
 
@@ -17,7 +12,6 @@ const INITIAL_LOGIT = 0.9
 const ACCELERATE = 1.2
 const DECELERATE = 0.5
 const MAX_ITERATIONS = 100;
-const TOLERANCE = 1e-8;
 
 function signum(x) {
     if (x < 0)
@@ -33,23 +27,21 @@ function logit(x) {
 }
 
 const Chart = () => {
-    const [games, setGames] = useState(gamesData);
-    const [teams, setTeams] = useState(teamsData);
+    const [games, setGames] = useState([...gamesData]);
+    const [teams, setTeams] = useState([...teamsData].sort((a, b) => {
+        if (a.logit < b.logit) {
+            return 1;
+        }
+        if (a.logit > b.logit) {
+            return -1;
+        }
+        return 0;
+    }));
     const methods = useForm();
-    const [sorting, setSorting] = useState([{ columnName: 'logit', direction: 'desc' }]);
-    const [defaultColumnWidths] = useState([
-        { columnName: 'name', width: '20%' },
-        { columnName: 'logit', width: '20%' },
-        { columnName: 'wins', width: '9%' },
-        { columnName: 'losses', width: '9%' },
-        { columnName: 'ties', width: '9%' },
-        { columnName: 'pointsFor', width: '12%' },
-        { columnName: 'pointsAgainst', width: '12%' },
-    ]);
     const { getValues, handleSubmit, register, reset } = methods
 
     function addGame(data) {
-        let newTeams = teamsData.slice()
+        let newTeams = [...teams]
 
         //Reset team stats
         newTeams.forEach((team) => {
@@ -67,102 +59,11 @@ const Chart = () => {
 
         let newGames = [...games, [parseInt(data.teamOne.value), parseInt(data.teamTwo.value), parseInt(data.scoreOne), parseInt(data.scoreTwo), null]]
         setGames(newGames)
-
-        newGames.forEach((game) => {
-            const teamOne = teams.find((team) => {
-                return team.id == game[0]
-            })
-            const teamTwo = teams.find((team) => {
-                return team.id == game[1]
-            })
-            let margin = game[2] - game[3]
-
-            let grade = SCORE_WEIGHT * logit(margin * SCALE)
-
-            grade += (1.0 - SCORE_WEIGHT) * (1.0 + signum(margin)) * 0.5
-
-            teamOne.sumGrades += grade
-            teamTwo.sumGrades = teamTwo.sumGrades + 1 - grade
-            teamOne.gamesPlayed++
-            teamTwo.gamesPlayed++
-            if (!teamOne.wins && !teamOne.losses && !teamOne.ties) {
-                teamOne.wins = 0
-                teamOne.losses = 0
-                teamOne.ties = 0
-                teamOne.pointsFor = 0
-                teamOne.pointsAgainst = 0
-            }
-            if (!teamTwo.wins && !teamTwo.losses && !teamTwo.ties) {
-                teamTwo.wins = 0
-                teamTwo.losses = 0
-                teamTwo.ties = 0
-                teamTwo.pointsFor = 0
-                teamTwo.pointsAgainst = 0
-            }
-
-            //Add wins-losses-ties
-            if (game[2] > game[3]) {
-                teamOne.wins++
-                teamTwo.losses++
-            } else if (game[2] < game[3]) {
-                teamOne.losses++
-                teamTwo.wins++
-            } else {
-                teamOne.ties++
-                teamTwo.ties++
-            }
-
-            //Points for-against
-            teamOne.pointsFor += game[2]
-            teamOne.pointsAgainst += game[3]
-            teamTwo.pointsFor += game[3]
-            teamTwo.pointsAgainst += game[2]
-        })
-
-        for (let i = 0; i < MAX_ITERATIONS; i++) {
-            newTeams.forEach((team) => {
-                team.sumExpectedGrades = 0.0
-            })
-            //Update ranking stats
-            newGames.forEach((game) => {
-                const teamOne = teams.find((team) => {
-                    return team.id == game[0]
-                })
-                const teamTwo = teams.find((team) => {
-                    return team.id == game[1]
-                })
-                const diff = teamOne.logit - teamTwo.logit
-                const expectedGrade = logit(diff * SCALE)
-                teamOne.sumExpectedGrades += expectedGrade
-                teamTwo.sumExpectedGrades = teamTwo.sumExpectedGrades + 1.0 - expectedGrade
-            })
-            newTeams.forEach((team) => {
-                const diff = team.sumGrades - team.sumExpectedGrades
-                if (signum(team.momentum) == signum(diff)) {
-                    team.momentum *= ACCELERATE
-                }
-                else {
-                    team.momentum *= -DECELERATE
-                }
-                team.logit += parseFloat(team.momentum)
-                team.logit = Math.round(team.logit * 1000) / 1000
-            })
-        }
-
-        newTeams.sort((a, b) => { return a.logit > b.logit })
-
-        setTeams(newTeams)
-        setSorting([{ columnName: 'logit', direction: 'desc' }])
-        reset({
-            teamOne: '',
-            scoreOne: '',
-            teamTwo: '',
-            scoreTwo: ''
-        })
+        updateTeams(newGames)
     }
 
-    function resetTeams() {
-        let newTeams = teamsData.slice()
+    function updateTeams(gameList) {
+        let newTeams = [...teamsData]
         newTeams.forEach((team) => {
             team.pointsFor = 0
             team.pointsAgainst = 0
@@ -175,8 +76,7 @@ const Chart = () => {
             team.sumExpectedGrades = 0.0
             team.gamesPlayed = 0
         })
-
-        games.forEach((game) => {
+        gameList.forEach((game) => {
             const teamOne = teams.find((team) => {
                 return team.id == game[0]
             })
@@ -232,7 +132,7 @@ const Chart = () => {
                 team.sumExpectedGrades = 0.0
             })
             //Update ranking stats
-            games.forEach((game) => {
+            gameList.forEach((game) => {
                 const teamOne = teams.find((team) => {
                     return team.id == game[0]
                 })
@@ -256,13 +156,16 @@ const Chart = () => {
                 team.logit = Math.round(team.logit * 1000) / 1000
             })
         }
-        setTeams(newTeams)
-        // setSorting([{ columnName: 'logit', direction: 'desc' }])
-    }
-
-    function handleReset() {
-        setGames(gamesData)
-        resetTeams()
+        newTeams.sort((a, b) => {
+            if (a.logit < b.logit) {
+                return 1;
+            }
+            if (a.logit > b.logit) {
+                return -1;
+            }
+            return 0;
+        })
+        setTeams([...newTeams])
         reset({
             teamOne: '',
             scoreOne: '',
@@ -271,32 +174,10 @@ const Chart = () => {
         })
     }
 
-    const HighlightedCell = ({ value, style, ...restProps }) => (
-        <Table.Cell
-            {...restProps}
-            style={{
-                fontSize: 12,
-            }}
-        >
-            <span>
-                {value}
-            </span>
-        </Table.Cell>
-    );
-
-    const Cell = props => {
-        return <HighlightedCell {...props} />;
-    };
-
-    const teamCols = [
-        { name: 'displayName', title: 'Team' },
-        { name: 'logit', title: 'Logit' },
-        { name: 'wins', title: 'Wins' },
-        { name: 'losses', title: 'Losses' },
-        { name: 'ties', title: 'Ties' },
-        { name: 'pointsFor', title: 'Points For' },
-        { name: 'pointsAgainst', title: 'Points Against' },
-    ]
+    function handleReset() {
+        setGames([...gamesData])
+        updateTeams([...gamesData])
+    }
 
     //Select styling
     const customStyles = {
@@ -313,9 +194,6 @@ const Chart = () => {
             color: 'black'
         })
     }
-
-    //Theme styling
-    const theme = createTheme({ palette: {} });
 
     return (
         <div>
@@ -339,44 +217,26 @@ const Chart = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {[]
-                        .concat(teams)
-                        .sort((a,b) => {
-                            console.log(a.logit > b.logit)
-                            return a.logit > b.logit
-                        })
-                        .map((team, index) => {
-                            return (
-                                <tr
-                                    key={index}
-                                    style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid' }}
-                                >
-                                    <TableCell>{team.displayName}</TableCell>
-                                    <TableCell>{team.logit.toFixed(3)}</TableCell>
-                                    <TableCell>{team.wins}</TableCell>
-                                    <TableCell>{team.losses}</TableCell>
-                                    <TableCell>{team.ties}</TableCell>
-                                    <TableCell>{team.pointsFor}</TableCell>
-                                    <TableCell>{team.pointsAgainst}</TableCell>
-                                </tr>
-                            );
-                        })}
+                        {teams
+                            .map((team, index) => {
+                                return (
+                                    <tr
+                                        key={index}
+                                        style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid' }}
+                                    >
+                                        <TableCell>{team.displayName}</TableCell>
+                                        <TableCell>{team.logit.toFixed(3)}</TableCell>
+                                        <TableCell>{team.wins}</TableCell>
+                                        <TableCell>{team.losses}</TableCell>
+                                        <TableCell>{team.ties}</TableCell>
+                                        <TableCell>{team.pointsFor}</TableCell>
+                                        <TableCell>{team.pointsAgainst}</TableCell>
+                                    </tr>
+                                );
+                            })}
                     </tbody>
                 </table>
             </GamesTable>
-            {/* <ThemeProvider theme={theme}>
-                <Paper>
-                    <Grid rows={teams} columns={teamCols}>
-                        <SortingState
-                            sorting={sorting}
-                            onSortingChange={setSorting}
-                        />
-                        <IntegratedSorting />
-                        <Table cellComponent={Cell} columnExtensions={defaultColumnWidths} />
-                        <TableHeaderRow showSortingControls />
-                    </Grid>
-                </Paper>
-            </ThemeProvider> */}
             <form onSubmit={handleSubmit(addGame)}>
                 <Controller
                     control={methods.control}
@@ -391,7 +251,7 @@ const Chart = () => {
                                         required: true, validate: {
                                             notSameTeam: (team) => {
                                                 return (getValues("teamTwo")
-                                                    && team != getValues("teamTwo").value)
+                                                    && team.value != getValues("teamTwo").value)
                                             }
                                         }
                                     })}
@@ -428,8 +288,10 @@ const Chart = () => {
                                     {...register("teamTwo", {
                                         required: true, validate: {
                                             notSameTeam: (team) => {
+                                                console.log(getValues("teamOne"))
+                                                console.log(team)
                                                 return getValues("teamOne")
-                                                    && team != getValues("teamOne").value
+                                                    && team.value != getValues("teamOne").value
                                             }
                                         }
                                     })}

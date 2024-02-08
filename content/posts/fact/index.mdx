@@ -1,5 +1,5 @@
 ---
-title: 'Fact Ratings'
+title: 'NFL Fact Ratings'
 date: 2024-02-03
 tags: 
   - Data
@@ -7,5 +7,13 @@ tags:
 ---
 
 import Chart from "./Fact.js";
+
+This table displays FACT ratings for NFL teams during the 2023-2024 season. As we lead up to the Super Bowl,  Users can add games to see how the ratings would change.
+
+The FACT rating system utilizes a logit regression against each games' scoring margin to determine the strength of each victory. Notably, the system gives each team a running 'momentum' rating that distinguishes between 'streak-less' runs and consecutive wins-losses. FACT also runs many iterations of the data to ensure convergence.
+
+FACT is the creation of David Rothman, a statistician and founder of the aptly-named Foundation for the Analysis of Competitions and Tournaments (FACT). FACT was included as a major selector for the NCAA Football Championship starting in 1968. In 2006, the NCAA changed regulartions to require copmuter ranking systems to no longer include margin of victory as part of its calculations. Rothman refused to alter his system, arguing the use of score was necessary, and that any perceived pitfalls of doing so was minimal. Despite his compelling arguments, Rothman's FACT was dropped by the NCAA. The use of computer polls has diminished since the founding of the College Football Playoff in 2014. However, the Playoff Committee has stated that computer polls are still taken into consideration during the selection process.
+
+Peter Wolfe, who developed his own ranking system used by college football, maintains an up-to-date listing of FACT for the NCAA.
 
 <Chart />
