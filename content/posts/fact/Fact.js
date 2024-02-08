@@ -2,8 +2,12 @@
 import React, { useState } from 'react';
 import Select from 'react-select'
 import { useForm, Controller } from "react-hook-form"
-import { TableCell, TableHeader, GamesTable } from './Fact.css';
+import { TableCell, TableHeader, GamesTable, TeamsTable } from './Fact.css';
 import { teamsData, teamNames, gamesData } from './data.js'
+import { ThemeProvider, createTheme } from '@mui/material';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 
 const SCORE_WEIGHT = 0.5
 const SCALE = 0.112
@@ -195,9 +199,14 @@ const Chart = () => {
         })
     }
 
+    const theme = createTheme({
+        palette: {}
+    });
+
     return (
-        <div>
-            <GamesTable>
+        <ThemeProvider theme={theme}>
+            <p style={{ fontSize: '1.8rem', margin: '40px 0px 0px 0px', textAlign: 'center' }}>FACT Ratings for the 2023-2024 NFL Season</p>
+            <TeamsTable>
                 <table
                     style={{
                         width: '100%',
@@ -207,6 +216,7 @@ const Chart = () => {
                 >
                     <thead>
                         <tr style={{ width: '100%', justifyContent: 'center' }}>
+                            <TableHeader>Rank</TableHeader>
                             <TableHeader>Team</TableHeader>
                             <TableHeader>Logit</TableHeader>
                             <TableHeader>Wins</TableHeader>
@@ -224,6 +234,7 @@ const Chart = () => {
                                         key={index}
                                         style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid' }}
                                     >
+                                        <TableCell>{index + 1}</TableCell>
                                         <TableCell>{team.displayName}</TableCell>
                                         <TableCell>{team.logit.toFixed(3)}</TableCell>
                                         <TableCell>{team.wins}</TableCell>
@@ -236,7 +247,8 @@ const Chart = () => {
                             })}
                     </tbody>
                 </table>
-            </GamesTable>
+            </TeamsTable>
+            <p style={{ fontSize: '1.8rem', margin: '0px', textAlign: 'center' }}>Add Games</p>
             <form onSubmit={handleSubmit(addGame)}>
                 <Controller
                     control={methods.control}
@@ -270,11 +282,21 @@ const Chart = () => {
                 />
                 <label>Score
                     <br />
-                    <input
-                        {...register("scoreOne", { required: true, pattern: /^[0-9]+/i })}
-                        type="number"></input>
+                    <TextField
+                        type="number"
+                        inputProps={{
+                            inputProps: { min: 0 },
+                            style: {
+                                padding: '10px'
+                            }
+                        }}
+                        sx={{
+                            backgroundColor: 'white',
+                            color: 'black',
+                            borderRadius: '5px'
+                        }}
+                        {...register("scoreOne", { required: true, pattern: /^[0-9]+/i, min: 0 })}></TextField>
                 </label>
-                <br />
                 <br />
                 <Controller
                     control={methods.control}
@@ -309,14 +331,31 @@ const Chart = () => {
                     }}
                 />
                 <label>Score
-                    <br />
-                    <input
-                        {...register("scoreTwo", { required: true, pattern: /^[0-9]+/i })}
-                        type="number"></input>
                 </label>
-                <button type="submit">Submit</button>
-                <button onClick={handleReset}>Reset</button>
+                <br />
+                <TextField
+                    min="0"
+                    type="number"
+                    inputProps={{
+                        inputProps: { min: 0 },
+                        style: {
+                            padding: '10px'
+                        }
+                    }}
+                    sx={{
+                        backgroundColor: 'white',
+                        color: 'black',
+                        borderRadius: '5px'
+                    }}
+                    {...register("scoreTwo", { required: true, pattern: /^[0-9]+/i })}></TextField>
+                <br />
+                <br />
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '20vw' }}>
+                    <Button variant="contained" type="submit">Submit</Button>
+                    <Button variant="contained" onClick={handleReset}>Reset</Button>
+                </div>
             </form>
+            <p style={{ fontSize: '1.8rem', margin: '0px', textAlign: 'center' }}>Games List</p>
             <GamesTable>
                 <table
                     style={{
@@ -328,10 +367,10 @@ const Chart = () => {
                     <thead>
                         <tr style={{ width: '100%', justifyContent: 'center' }}>
                             <TableHeader>Date</TableHeader>
-                            <TableHeader>Home</TableHeader>
-                            <TableHeader>Home Score</TableHeader>
                             <TableHeader>Away</TableHeader>
                             <TableHeader>Away Score</TableHeader>
+                            <TableHeader>Home</TableHeader>
+                            <TableHeader>Home Score</TableHeader>
                         </tr>
                     </thead>
                     <tbody>
@@ -342,17 +381,17 @@ const Chart = () => {
                                     style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid' }}
                                 >
                                     <TableCell>{game[4]}</TableCell>
-                                    <TableCell>{teamNames[game[0]]}</TableCell>
-                                    <TableCell>{game[2]}</TableCell>
                                     <TableCell>{teamNames[game[1]]}</TableCell>
                                     <TableCell>{game[3]}</TableCell>
+                                    <TableCell>{teamNames[game[0]]}</TableCell>
+                                    <TableCell>{game[2]}</TableCell>
                                 </tr>
                             );
                         })}
                     </tbody>
                 </table>
             </GamesTable>
-        </div>
+        </ThemeProvider>
     );
 };
 
