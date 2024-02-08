@@ -5,7 +5,6 @@ import { useForm, Controller } from "react-hook-form"
 import { TableCell, TableHeader, GamesTable, TeamsTable } from './Fact.css';
 import { teamsData, teamNames, gamesData } from './data.js'
 import { ThemeProvider, createTheme } from '@mui/material';
-import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 

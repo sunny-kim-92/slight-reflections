@@ -3,6 +3,7 @@ title: 'Interactive NFL FACT Ratings'
 date: 2024-02-03
 tags: 
   - Data
+  - Interactive
   - Sports
 ---
 
@@ -10,7 +11,7 @@ import Chart from "./Fact.js";
 
 As we approach Super Bowl weekend, take a look back at the 2023-2024 NFL season by viewing the FACT ratings for each team. Users can add games to see how the ratings for each team would change.
 
-The FACT rating system utilizes a logit regression against each games' scoring margin to determine the strength of each victory. Notably, the system gives each team a running 'momentum' rating that distinguishes between 'streak-less' runs and consecutive wins-losses. FACT also runs many iterations of the data to ensure convergence.
+The FACT rating system utilizes a logit regression against each games' scoring margin to determine the strength of each victory. Notably, the system gives each team a running 'momentum' rating that distinguishes between win-loss 'streaks' and 'streakless' runs. FACT also runs many iterations of the data to ensure convergence.
 
 FACT is the creation of David Rothman, a statistician and founder of the aptly-named Foundation for the Analysis of Competitions and Tournaments (FACT). College football famously used computer polls to help decide which teams would play for the national championship. College football in particular has a great need for a system to rank teams, as many schools compete each year ([858 in 2023](https://www.ncsasports.org/football/colleges#:~:text=Melvin%20University%20(LA)-,How%20many%20college%20football%20teams%20are%20there%3F,Division%203%2C%20NAIA%20and%20NJCAA.)).
 
