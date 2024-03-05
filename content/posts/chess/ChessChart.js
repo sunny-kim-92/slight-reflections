@@ -104,7 +104,7 @@ function ChessChart() {
 
     let playerIndex = null
     let player = null
-    let newColor = mainPlayerColor.value
+    let newColor = mainPlayerColor
     if(options.type === 'playerChange'){
       playerIndex = options.data.playerIndex
       player = options.data.player
@@ -166,6 +166,7 @@ function ChessChart() {
     }
 
     // Set color state
+    console.log(newColor)
     if(newColor){
       setMainPlayerColor(newColor)
     }
