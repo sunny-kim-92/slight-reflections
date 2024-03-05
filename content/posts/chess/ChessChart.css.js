@@ -20,15 +20,13 @@ export const DoughnutContainer = styled.div`
   margin-right: 2vw;
   position: relative;
   ${MEDIA.TABLET`
-  width: 90%;
-  margin-bottom: 20vh;
+  width: 50%;
 `};
 `;
 
 export const ChessboardContainer = styled.div`
   ${MEDIA.TABLET`
   width: 100%;
-  margin-top: 25vh;
 `};
 `;
 
@@ -45,14 +43,16 @@ export const Text = styled.span`
 
 export const DropdownContainer = styled.div`
   align-content: center;
-  padding-left: 10vw;
-  padding-right: 10vw;
-  padding-bottom: 2vh;
+  width: 22vw;
+  margin-bottom: 10px;
+  ${MEDIA.TABLET`
+  width: 40vw;
+`};
 `;
 
 export const GamesTable = styled.div`
   margin-top: 6vh;
-  max-height: 30vh;
+  max-height: 35vh;
   overflow-y: auto;
   justify-content: center;
   padding-bottom: 4px;

@@ -11,7 +11,6 @@ import {
   TableHeader,
   GamesTable,
   DoughnutContainer,
-  ChessboardContainer,
 } from './ChessChart.css';
 import { Chessboard } from "react-chessboard";
 import * as ChessJS from "chess.js";
@@ -36,7 +35,7 @@ function ChessChart() {
     { value: 'Alireza_Firouzja', label: 'Alireza Firouzja' },
     { value: 'Hikaru_Nakamura', label: 'Hikaru Nakamura' },
   ]
-  const [mainPlayerColor, setMainPlayerColor] = useState({ value: 'Both', label: 'Both' })
+  const [mainPlayerColor, setMainPlayerColor] = useState({ value: 'Black', label: 'Black' })
   const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
   const [games, setGames] = useState([])
   const [moves, setMoves] = useState([])
@@ -77,11 +76,7 @@ function ChessChart() {
             totalMoveCountMap[moves[0]]++;
           }
 
-          if (playerOne == entry.white) {
-            opponentName = entry.black;
-          } else {
-            opponentName = entry.white;
-          }
+          opponentName = entry.white;
 
           if (!playersMoveCountMap[opponentName]) {
             playersMoveCountMap[opponentName] = {};
@@ -100,15 +95,25 @@ function ChessChart() {
     load()
   }, [])
 
-  const handleReset = () => {
+  const handleReset = (options = {}) => {
     let totalMoveCountMap = {};
     let playersMoveCountMap = {};
 
     let newGames = [];
     let opponentName = '';
 
+    let playerIndex = null
+    let player = null
+    let newColor = mainPlayerColor.value
+    if(options.type === 'playerChange'){
+      playerIndex = options.data.playerIndex
+      player = options.data.player
+    } else if(options.type === 'colorChange'){
+      newColor = options.data.color
+    }
+
     data.forEach(entry => {
-      if (getColorFilter(entry)) {
+      if (getColorFilter(entry, playerIndex, player, newColor)) {
         let tempGame = entry;
         let moves = null;
         if (typeof entry.moves == 'object') {
@@ -131,7 +136,7 @@ function ChessChart() {
           totalMoveCountMap[moves[0]]++;
         }
 
-        if (playerOne == entry.white) {
+        if (newColor.value == 'White') {
           opponentName = entry.black;
         } else {
           opponentName = entry.white;
@@ -148,6 +153,24 @@ function ChessChart() {
         newGames.push(tempGame);
       }
     });
+
+    // Set player state
+    if (playerIndex === 1) {
+      setPlayerOne(player)
+    } else if (playerIndex === 2) {
+      setPlayerTwo(player)
+    } else if (playerIndex === 3) {
+      setPlayerThree(player)
+    } else if (playerIndex === 4) {
+      setPlayerFour(player)
+    }
+
+    // Set color state
+    if(newColor){
+      setMainPlayerColor(newColor)
+    }
+
+    // Set games data state
     setMoves([])
     setNotation('')
     chessObject.reset()
@@ -254,10 +277,8 @@ function ChessChart() {
 
     let fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     if (newMove) {
-      console.log(chessObject.fen())
       chessObject.move(newMove);
       fen = chessObject.fen();
-      console.log(fen)
     }
 
     newGames.sort(sortGames);
@@ -268,63 +289,23 @@ function ChessChart() {
   };
 
   const handlePlayerOneChange = event => {
-    setPlayerOne(event)
-    setMoves([])
-    setLabels([])
-    setDatasets([
-      {
-        data: [],
-      },
-    ])
-    handleReset()
+    handleReset({type: 'playerChange', data: {playerIndex: 1, player: event}})
   };
 
   const handlePlayerTwoChange = event => {
-    setPlayerTwo(event)
-    setMoves([])
-    setLabels([])
-    setDatasets([
-      {
-        data: [],
-      },
-    ])
-    handleReset()
+    handleReset({type: 'playerChange', data: {playerIndex: 2, player: event}})
   };
 
   const handlePlayerThreeChange = event => {
-    setPlayerThree(event)
-    setMoves([])
-    setLabels([])
-    setDatasets([
-      {
-        data: [],
-      },
-    ])
-    handleReset()
+    handleReset({type: 'playerChange', data: {playerIndex: 3, player: event}})
   };
 
   const handlePlayerFourChange = event => {
-    setPlayerFour(event)
-    setMoves([])
-    setLabels([])
-    setDatasets([
-      {
-        data: [],
-      },
-    ])
-    handleReset()
+    handleReset({type: 'playerChange', data: {playerIndex: 4, player: event}})
   };
 
   const handleColorChange = event => {
-    setMainPlayerColor(event)
-    setMoves([])
-    setLabels([])
-    setDatasets([
-      {
-        data: [],
-      },
-    ])
-    handleReset()
+    handleReset({type: 'colorChange', data: {color: event}})
   };
 
   const sortGames = (game1, game2) => {
@@ -373,32 +354,39 @@ function ChessChart() {
     }
   };
 
-  const getColorFilter = (entry) => {
-    if (mainPlayerColor == 'Both') {
-      return (
-        (entry.white == playerOne.value ||
-          entry.black == playerOne.value) &&
-        (entry.white == playerTwo.value ||
-          entry.black == playerTwo.value ||
-          entry.white == playerThree.value ||
-          entry.black == playerThree.value ||
-          entry.white == playerFour.value ||
-          entry.black == playerFour.value)
-      );
+  const getColorFilter = (entry, playerIndex = null, player = null, color = null) => {
+    let playerOneValue = playerOne.value
+    let playerTwoValue = playerTwo.value
+    let playerThreeValue = playerThree.value
+    let playerFourValue = playerFour.value
+    if(playerIndex === 1){
+      playerOneValue = player.value
+    } else if (playerIndex === 2){
+      playerTwoValue = player.value
+    } else if(playerIndex === 3){
+      playerThreeValue = player.value
+    } else if (playerIndex === 4){
+      playerFourValue = player.value
     }
-    if (mainPlayerColor.value == 'White') {
+
+    let mainColor = mainPlayerColor.value
+    if(color){
+      mainColor = color.value
+    }
+
+    if (mainColor == 'White') {
       return (
-        entry.white == playerOne.value &&
-        (entry.black == playerTwo.value ||
-          entry.black == playerThree.value ||
-          entry.black == playerFour.value)
+        entry.white == playerOneValue &&
+        (entry.black == playerTwoValue ||
+          entry.black == playerThreeValue ||
+          entry.black == playerFourValue)
       );
     } else {
       return (
-        entry.black == playerOne.value &&
-        (entry.white == playerTwo.value ||
-          entry.white == playerThree.value ||
-          entry.white == playerFour.value)
+        entry.black == playerOneValue &&
+        (entry.white == playerTwoValue ||
+          entry.white == playerThreeValue ||
+          entry.white == playerFourValue)
       );
     }
   };
@@ -453,115 +441,126 @@ function ChessChart() {
 
   return (
     <Container>
-      <DropdownContainer>
-        <div style={{ textAlign: 'left', marginBottom: '1vh' }}>
-          Main Player:
+      <div style={{ display: 'flex' }}>
+        <div>
+          <DropdownContainer>
+            <div style={{ textAlign: 'left', marginBottom: '1vh' }}>
+              Main Player:
+            </div>
+            <Dropdown
+              menuPlacement="auto"
+              options={playerOptions.filter(player => {
+                return (
+                  player.value != playerTwo.value &&
+                  player.value != playerThree.value &&
+                  player.value != playerFour.value
+                );
+              })}
+              onChange={handlePlayerOneChange}
+              value={playerOne}
+              placeholder="Select a Player"
+              styles={{
+                control: (baseStyles, state) => ({
+                  ...baseStyles,
+                  color: '#FFF',
+                })
+              }}
+            />
+          </DropdownContainer>
+          <DropdownContainer style={{ marginBottom: '4vh' }}>
+            <div style={{ textAlign: 'left', marginBottom: '1vh' }}>
+              Main Player Color:
+            </div>
+            <Dropdown
+              menuPlacement="auto"
+              options={[
+                { value: 'Black', label: 'Black' },
+                { value: 'White', label: 'White' },
+              ]}
+              onChange={handleColorChange}
+              value={mainPlayerColor}
+              defaultValue={{ value: 'Black', label: 'Black' }}
+            />
+          </DropdownContainer>
+          <DropdownContainer>
+            <div style={{ textAlign: 'left', marginBottom: '1vh' }}>
+              Players to Compare:
+            </div>
+            <Dropdown
+              menuPlacement="auto"
+              options={playerOptions.filter(player => {
+                return (
+                  player.value != playerOne.value &&
+                  player.value != playerThree.value &&
+                  player.value != playerFour.value
+                );
+              })}
+              onChange={handlePlayerTwoChange}
+              value={playerTwo}
+              placeholder="Select a Player"
+            />
+          </DropdownContainer>
+          <DropdownContainer>
+            <Dropdown
+              menuPlacement="auto"
+              options={playerOptions.filter(player => {
+                return (
+                  player.value != playerOne.value &&
+                  player.value != playerTwo.value &&
+                  player.value != playerFour.value
+                );
+              })}
+              onChange={handlePlayerThreeChange}
+              value={playerThree}
+              placeholder="Select a Player"
+            />
+          </DropdownContainer>
+          <DropdownContainer>
+            <Dropdown
+              menuPlacement="auto"
+              options={playerOptions.filter(player => {
+                return (
+                  player.value != playerOne.value &&
+                  player.value != playerTwo.value &&
+                  player.value != playerThree.value
+                );
+              })}
+              onChange={handlePlayerFourChange}
+              value={playerFour}
+              placeholder="Select a Player"
+            />
+          </DropdownContainer>
         </div>
-        <Dropdown
-          menuPlacement="auto"
-          options={playerOptions.filter(player => {
-            return (
-              player != playerTwo &&
-              player != playerThree &&
-              player != playerFour
-            );
-          })}
-          onChange={handlePlayerOneChange}
-          value={playerOne}
-          placeholder="Select a Player"
-        />
-      </DropdownContainer>
-      <DropdownContainer style={{ marginBottom: '4vh' }}>
-        <div style={{ textAlign: 'left', marginBottom: '1vh' }}>
-          Main Player Color:
+        <div>
+          <ChartLayout>
+            <DoughnutContainer>
+              <Doughnut
+                ref={chartRef}
+                data={radarData}
+                options={{
+                  plugins: {
+                    backgroundPlugin: false
+                  }
+                }}
+                onClick={(evt) => {
+                  handleMoveSelect(evt);
+                }}
+              ></Doughnut>
+              <div style={{ marginTop: '3vh' }}>
+                &nbsp;{notation}
+              </div>
+              <button onClick={handleReset}>
+                Reset Moves
+              </button>
+            </DoughnutContainer>
+            <Chessboard
+              arePiecesDraggable={false}
+              boardWidth={360}
+              position={fen}
+            ></Chessboard>
+          </ChartLayout>
         </div>
-        <Dropdown
-          menuPlacement="auto"
-          options={[
-            { value: 'Both', label: 'Both' },
-            { value: 'Black', label: 'Black' },
-            { value: 'White', label: 'White' },
-          ]}
-          onChange={handleColorChange}
-          value={mainPlayerColor}
-          defaultValue={{ value: 'Both', label: 'Both' }}
-        />
-      </DropdownContainer>
-      <DropdownContainer>
-        <div style={{ textAlign: 'left', marginBottom: '1vh' }}>
-          Players to Compare:
-        </div>
-        <Dropdown
-          menuPlacement="auto"
-          options={playerOptions.filter(player => {
-            return (
-              player != playerOne &&
-              player != playerThree &&
-              player != playerFour
-            );
-          })}
-          onChange={handlePlayerTwoChange}
-          value={playerTwo}
-          placeholder="Select a Player"
-        />
-      </DropdownContainer>
-      <DropdownContainer>
-        <Dropdown
-          menuPlacement="auto"
-          options={playerOptions.filter(player => {
-            return (
-              player != playerOne &&
-              player != playerTwo &&
-              player != playerFour
-            );
-          })}
-          onChange={handlePlayerThreeChange}
-          value={playerThree}
-          placeholder="Select a Player"
-        />
-      </DropdownContainer>
-      <DropdownContainer>
-        <Dropdown
-          menuPlacement="auto"
-          options={playerOptions.filter(player => {
-            return (
-              player != playerOne &&
-              player != playerTwo &&
-              player != playerThree
-            );
-          })}
-          onChange={handlePlayerFourChange}
-          value={playerFour}
-          placeholder="Select a Player"
-        />
-      </DropdownContainer>
-      <ChartLayout>
-        <DoughnutContainer>
-          <Doughnut
-            ref={chartRef}
-            data={radarData}
-            options={{
-              plugins: {
-                backgroundPlugin: false
-              }
-            }}
-            onClick={(evt) => {
-              handleMoveSelect(evt);
-            }}
-          ></Doughnut>
-          <div style={{ marginTop: '5vh' }}>
-            &nbsp;{notation}
-          </div>
-          <button style={{ marginTop: '2vh' }} onClick={handleReset}>
-            Reset Moves
-          </button>
-        </DoughnutContainer>
-        <Chessboard
-          arePiecesDraggable={false}
-          boardWidth={480}
-          position={fen}
-        ></Chessboard>
-      </ChartLayout>
+      </div>
       <GamesTable>
         <table
           style={{
