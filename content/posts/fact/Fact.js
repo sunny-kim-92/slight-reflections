@@ -234,7 +234,9 @@ const Chart = () => {
                                         style={{ width: '100%', justifyContent: 'center', borderBottom: '1pt solid' }}
                                     >
                                         <TableCell>{index + 1}</TableCell>
-                                        <TableCell>{team.displayName}</TableCell>
+                                        <TableCell>{team.name.split("_")
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(" ")}</TableCell>
                                         <TableCell>{team.logit.toFixed(3)}</TableCell>
                                         <TableCell>{team.wins}</TableCell>
                                         <TableCell>{team.losses}</TableCell>
